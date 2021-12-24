@@ -1,35 +1,42 @@
 package main
 
 import (
-	"bufio"
+	"advent-of-code/day1"
+	"flag"
 	"fmt"
+	"io"
 	"log"
-	"math"
 	"os"
-	"strconv"
 )
 
 func main() {
-	f, err := os.Open("input-1a.txt")
+	var (
+		day  = flag.Int("day", 0, "day to solve")
+		part = flag.Int("part", 0, "part to solve")
+	)
+	flag.Parse()
+	type entry struct {
+		day, part int
+	}
+	solvers := map[entry]func(r io.Reader) (answer string, err error){
+		{1, 2}: day1.Part2,
+	}
+	solverFunc, ok := solvers[entry{*day, *part}]
+	if !ok {
+		log.Fatalf("No solution for day %d part %d.", *day, part)
+	}
+	f, err := os.Open(fmt.Sprintf("inputs/day%d.txt", *day))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("No input for day %d.", *day)
 	}
-	s := bufio.NewScanner(f)
-	var last = math.MaxInt
-	var increases int
-	for s.Scan() {
-		text := s.Text()
-		n, err := strconv.Atoi(text)
-		if err != nil {
-			log.Fatal(err)
+	defer func() {
+		if err := f.Close(); err != nil {
+			log.Printf("Failed to close input file: %v", err)
 		}
-		if n > last {
-			increases++
-		}
-		last = n
+	}()
+	ans, err := solverFunc(f)
+	if err != nil {
+		log.Fatalf("Solver returned an error: %v", err)
 	}
-	if err := s.Err(); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(increases, "Increases")
+	fmt.Println(ans)
 }

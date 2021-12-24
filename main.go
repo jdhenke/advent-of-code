@@ -26,12 +26,13 @@ func main() {
 		{1, 1}: day1.Part1,
 		{1, 2}: day1.Part2,
 		{2, 1}: day2.Part1,
+		{2, 2}: day2.Part2,
 	}
 	solverFunc, ok := solvers[entry{*day, *part}]
 	if !ok {
 		log.Fatalf("No solution for day %d part %d.", *day, *part)
 	}
-	f, err := os.Open(fmt.Sprintf("inputs/day%d.txt", *day))
+	f, err := os.Open(fmt.Sprintf("data/day%d.txt", *day))
 	if err != nil {
 		log.Fatalf("Failed to open input for %d: %v", *day, err)
 	}

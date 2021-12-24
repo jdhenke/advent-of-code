@@ -14,7 +14,7 @@ func Part1(r io.Reader) (answer string, err error) {
 		recent    = 0
 		increases = 0
 	)
-	if err := input.ScanInt(r, func(x int) {
+	if err := input.ForEachInt(r, func(x int) {
 		i++
 		if i > 1 && x > recent {
 			increases++
@@ -32,7 +32,7 @@ func Part2(r io.Reader) (answer string, err error) {
 		recent    [size]int
 		increases = 0
 	)
-	if err := input.ScanInt(r, func(x int) {
+	if err := input.ForEachInt(r, func(x int) {
 		i++
 		if i > 3 && x > recent[i%3] {
 			increases++

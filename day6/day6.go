@@ -8,6 +8,14 @@ import (
 )
 
 func Part1(r io.Reader) (ans int, err error) {
+	return day6(r, 80)
+}
+
+func Part2(r io.Reader) (ans int, err error) {
+	return day6(r, 256)
+}
+
+func day6(r io.Reader, days int) (ans int, err error) {
 	var nums []int
 	b, err := ioutil.ReadAll(r)
 	if err != nil {
@@ -22,7 +30,7 @@ func Part1(r io.Reader) (ans int, err error) {
 	}
 	total := 0
 	for _, x := range nums {
-		total += solve(x, 80)
+		total += solve(x, days)
 	}
 	return total, nil
 }

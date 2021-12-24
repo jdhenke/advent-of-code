@@ -15,3 +15,9 @@ func TestPart1(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 5934, ans)
 }
+
+func TestPart2(t *testing.T) {
+	ans, err := day6.Part2(strings.NewReader(testData))
+	require.NoError(t, err)
+	assert.Equal(t, 26984457539, ans)
+}

@@ -5,6 +5,7 @@ import (
 	"advent-of-code/day2"
 	"advent-of-code/day3"
 	"advent-of-code/day4"
+	"advent-of-code/day5"
 	"flag"
 	"fmt"
 	"io"
@@ -33,6 +34,7 @@ func main() {
 		{3, 2}: day3.Part2,
 		{4, 1}: day4.Part1,
 		{4, 2}: day4.Part2,
+		{5, 1}: day5.Part1,
 	}
 	solverFunc, ok := solvers[entry{*day, *part}]
 	if !ok {

@@ -30,5 +30,5 @@ func TestPart1(t *testing.T) {
 func TestPart2(t *testing.T) {
 	ans, err := day3.Part2(strings.NewReader(testData))
 	require.NoError(t, err)
-	assert.Equal(t, "", ans)
+	assert.Equal(t, "230", ans)
 }

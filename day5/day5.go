@@ -9,6 +9,14 @@ import (
 )
 
 func Part1(r io.Reader) (ans int, err error) {
+	return day5(r, false)
+}
+
+func Part2(r io.Reader) (ans int, err error) {
+	return day5(r, true)
+}
+
+func day5(r io.Reader, diagonal bool) (int, error) {
 	re := regexp.MustCompile(`(\d+),(\d+) -> (\d+),(\d+)`)
 	type entry struct {
 		x, j int
@@ -34,8 +42,18 @@ func Part1(r io.Reader) (ans int, err error) {
 			for x := x1; x <= x2; x++ {
 				spots[entry{x, y1}]++
 			}
-		} else {
-			return nil // ignore diff line direction
+		} else if diagonal {
+			dx, dy := 1, 1
+			if x2 < x1 {
+				dx = -1
+			}
+			if y2 < y1 {
+				dy = -1
+			}
+			for x, y := x1, y1; x != x2 && y != y2; x, y = x+dx, y+dy {
+				spots[entry{x, y}]++
+			}
+			spots[entry{x2, y2}]++
 		}
 		return nil
 	}); err != nil {
@@ -51,6 +69,9 @@ func Part1(r io.Reader) (ans int, err error) {
 }
 
 func mustInt(s string) int {
-	x, _ := strconv.Atoi(s)
+	x, err := strconv.Atoi(s)
+	if err != nil {
+		panic(err)
+	}
 	return x
 }

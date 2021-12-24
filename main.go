@@ -2,6 +2,7 @@ package main
 
 import (
 	"advent-of-code/day1"
+	"advent-of-code/day2"
 	"flag"
 	"fmt"
 	"io"
@@ -24,6 +25,7 @@ func main() {
 	solvers := map[entry]func(r io.Reader) (answer string, err error){
 		{1, 1}: day1.Part1,
 		{1, 2}: day1.Part2,
+		{2, 1}: day2.Part1,
 	}
 	solverFunc, ok := solvers[entry{*day, *part}]
 	if !ok {
@@ -31,7 +33,7 @@ func main() {
 	}
 	f, err := os.Open(fmt.Sprintf("inputs/day%d.txt", *day))
 	if err != nil {
-		log.Fatalf("No input for day %d.", *day)
+		log.Fatalf("Failed to open input for %d: %v", *day, err)
 	}
 	defer func() {
 		if err := f.Close(); err != nil {

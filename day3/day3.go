@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func Part1(r io.Reader) (ans string, err error) {
+func Part1(r io.Reader) (ans int, err error) {
 	// aggregate frequencies
 	var freqs []map[string]int
 	if err = input.ForEachLine(r, func(line string) error {
@@ -21,7 +21,7 @@ func Part1(r io.Reader) (ans string, err error) {
 		}
 		return nil
 	}); err != nil {
-		return "", err
+		return 0, err
 	}
 	// create gamma / epsilon things
 	var gamma, epsilon int
@@ -35,13 +35,13 @@ func Part1(r io.Reader) (ans string, err error) {
 			epsilon |= 1
 		}
 	}
-	return fmt.Sprint(gamma * epsilon), nil
+	return gamma * epsilon, nil
 }
 
-func Part2(r io.Reader) (ans string, err error) {
+func Part2(r io.Reader) (ans int, err error) {
 	rs, ok := r.(io.ReadSeeker)
 	if !ok {
-		return "", fmt.Errorf("this solution requires a ReadSeeker")
+		return 0, fmt.Errorf("this solution requires a ReadSeeker")
 	}
 	o2Str, err := filter(rs, func(zeroes, ones int) string {
 		if ones >= zeroes {
@@ -50,7 +50,7 @@ func Part2(r io.Reader) (ans string, err error) {
 		return "0"
 	})
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 	co2Str, err := filter(rs, func(zeroes, ones int) string {
 		if ones >= zeroes {
@@ -59,17 +59,17 @@ func Part2(r io.Reader) (ans string, err error) {
 		return "1"
 	})
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 	o2, err := strconv.ParseInt(o2Str, 2, 64)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 	co2, err := strconv.ParseInt(co2Str, 2, 64)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
-	return fmt.Sprint(o2 * co2), nil
+	return int(o2 * co2), nil
 }
 
 // constantly filters until the last line that matches is left

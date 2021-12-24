@@ -17,11 +17,11 @@ forward 2`
 func TestPart1(t *testing.T) {
 	ans, err := day2.Part1(strings.NewReader(testData))
 	assert.NoError(t, err)
-	assert.Equal(t, "150", ans)
+	assert.Equal(t, 150, ans)
 }
 
 func TestPart2(t *testing.T) {
 	ans, err := day2.Part2(strings.NewReader(testData))
 	assert.NoError(t, err)
-	assert.Equal(t, "900", ans)
+	assert.Equal(t, 900, ans)
 }

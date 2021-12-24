@@ -2,11 +2,10 @@ package day2
 
 import (
 	"advent-of-code/input"
-	"fmt"
 	"io"
 )
 
-func Part1(r io.Reader) (ans string, err error) {
+func Part1(r io.Reader) (ans int, err error) {
 	var (
 		horizontalPos = 0
 		depth         = 0
@@ -21,12 +20,12 @@ func Part1(r io.Reader) (ans string, err error) {
 			depth += val
 		}
 	}); err != nil {
-		return "", err
+		return 0, err
 	}
-	return fmt.Sprint(horizontalPos * depth), nil
+	return horizontalPos * depth, nil
 }
 
-func Part2(r io.Reader) (ans string, err error) {
+func Part2(r io.Reader) (ans int, err error) {
 	var (
 		aim           = 0
 		horizontalPos = 0
@@ -43,7 +42,7 @@ func Part2(r io.Reader) (ans string, err error) {
 			aim += val
 		}
 	}); err != nil {
-		return "", err
+		return 0, err
 	}
-	return fmt.Sprint(horizontalPos * depth), nil
+	return horizontalPos * depth, nil
 }

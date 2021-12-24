@@ -4,6 +4,7 @@ import (
 	"advent-of-code/day1"
 	"advent-of-code/day2"
 	"advent-of-code/day3"
+	"advent-of-code/day4"
 	"flag"
 	"fmt"
 	"io"
@@ -23,13 +24,15 @@ func main() {
 	type entry struct {
 		day, part int
 	}
-	solvers := map[entry]func(r io.Reader) (answer string, err error){
+	solvers := map[entry]func(r io.Reader) (answer int, err error){
 		{1, 1}: day1.Part1,
 		{1, 2}: day1.Part2,
 		{2, 1}: day2.Part1,
 		{2, 2}: day2.Part2,
 		{3, 1}: day3.Part1,
 		{3, 2}: day3.Part2,
+		{4, 1}: day4.Part1,
+		{4, 2}: day4.Part2,
 	}
 	solverFunc, ok := solvers[entry{*day, *part}]
 	if !ok {

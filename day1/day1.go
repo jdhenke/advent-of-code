@@ -2,13 +2,12 @@ package day1
 
 import (
 	"advent-of-code/input"
-	"fmt"
 	"io"
 )
 
 const size = 3
 
-func Part1(r io.Reader) (answer string, err error) {
+func Part1(r io.Reader) (answer int, err error) {
 	var (
 		i         = 0
 		recent    = 0
@@ -21,12 +20,12 @@ func Part1(r io.Reader) (answer string, err error) {
 		}
 		recent = x
 	}); err != nil {
-		return "", err
+		return 0, err
 	}
-	return fmt.Sprint(increases), nil
+	return increases, nil
 }
 
-func Part2(r io.Reader) (answer string, err error) {
+func Part2(r io.Reader) (answer int, err error) {
 	var (
 		i         = 0
 		recent    [size]int
@@ -39,7 +38,7 @@ func Part2(r io.Reader) (answer string, err error) {
 		}
 		recent[i%3] = x
 	}); err != nil {
-		return "", err
+		return 0, err
 	}
-	return fmt.Sprint(increases), nil
+	return increases, nil
 }

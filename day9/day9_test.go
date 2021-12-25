@@ -19,3 +19,9 @@ func TestPart1(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, 15, got)
 }
+
+func TestPart2(t *testing.T) {
+	got, err := day9.Part2(strings.NewReader(testData))
+	require.NoError(t, err)
+	assert.Equal(t, 1134, got)
+}

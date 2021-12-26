@@ -16,6 +16,14 @@ type entry struct {
 var re = regexp.MustCompile(`fold along ([xy])=(\d+)`)
 
 func Part1(r io.Reader) (ans int, err error) {
+	return day11(r, 1)
+}
+
+func Part2(r io.Reader) (ans int, err error) {
+	return day11(r, 0)
+}
+
+func day11(r io.Reader, numFolds int) (ans int, err error) {
 	dots := make(map[entry]bool)
 	scan := bufio.NewScanner(r)
 	scan.Scan()
@@ -40,9 +48,8 @@ func Part1(r io.Reader) (ans int, err error) {
 		dots[entry{x, y}] = true
 		scan.Scan()
 	}
-	numFolds := 1
 	folds := 0
-	for scan.Scan() && folds < numFolds {
+	for scan.Scan() && (numFolds == 0 || folds < numFolds) {
 		folds++
 		// fold along y=7
 		m := re.FindStringSubmatch(scan.Text())
@@ -64,7 +71,7 @@ func Part1(r io.Reader) (ans int, err error) {
 					}
 				}
 			}
-			maxX = num - 1
+			maxX = num
 		case "y":
 			for y := num + 1; y <= maxY; y++ {
 				for x := 0; x <= maxX; x++ {
@@ -74,11 +81,23 @@ func Part1(r io.Reader) (ans int, err error) {
 					}
 				}
 			}
-			maxY = num - 1
+			maxY = num
 		}
 	}
 	if err := scan.Err(); err != nil {
 		return 0, err
+	}
+	if numFolds == 0 {
+		for y := 0; y < maxY; y++ {
+			for x := 0; x < maxX; x++ {
+				c := " "
+				if dots[entry{x, y}] {
+					c = "#"
+				}
+				fmt.Printf(c)
+			}
+			fmt.Printf("\n")
+		}
 	}
 	return len(dots), nil
 }

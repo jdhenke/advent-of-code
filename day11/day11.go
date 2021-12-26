@@ -10,9 +10,32 @@ type entry struct {
 }
 
 func Part1(r io.Reader) (ans int, err error) {
+	if err := day11(r, func(step, flashes int) bool {
+		ans = flashes
+		return step < 100
+	}); err != nil {
+		return 0, err
+	}
+	return ans, nil
+}
+
+func Part2(r io.Reader) (ans int, err error) {
+	last := 0
+	if err := day11(r, func(step, flashes int) bool {
+		ans = step
+		ok := flashes-last < 100
+		last = flashes
+		return ok
+	}); err != nil {
+		return 0, err
+	}
+	return ans, nil
+}
+
+func day11(r io.Reader, proceed func(step int, flashes int) bool) (err error) {
 	nums, err := input.GetNumMatrix(r)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	neighbors := func(e entry) []entry {
@@ -29,7 +52,7 @@ func Part1(r io.Reader) (ans int, err error) {
 	}
 
 	totalFlashes := 0
-	for step := 0; step < 100; step++ {
+	for step := 0; proceed(step, totalFlashes); step++ {
 		var queue []entry
 		flashes := make(map[entry]bool)
 		for i := range nums {
@@ -64,5 +87,5 @@ func Part1(r io.Reader) (ans int, err error) {
 		}
 		totalFlashes += len(flashes)
 	}
-	return totalFlashes, nil
+	return nil
 }

@@ -71,5 +71,30 @@ func TestPart1(t *testing.T) {
 			assert.Equal(t, tc.want, got)
 		})
 	}
+}
 
+func TestPart2(t *testing.T) {
+	for i, tc := range []struct {
+		data string
+		want int
+	}{
+		{
+			data: test1,
+			want: 36,
+		},
+		{
+			data: test2,
+			want: 103,
+		},
+		{
+			data: test3,
+			want: 3509,
+		},
+	} {
+		t.Run(fmt.Sprint(i), func(t *testing.T) {
+			got, err := day12.Part2(strings.NewReader(tc.data))
+			require.NoError(t, err)
+			assert.Equal(t, tc.want, got)
+		})
+	}
 }

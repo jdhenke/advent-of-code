@@ -11,28 +11,84 @@ func Part1(r io.Reader) (ans int, err error) {
 	if err != nil {
 		return 0, err
 	}
-	covered := map[string]bool{"start": true}
 	current := "start"
-	return numPaths(g, covered, current), nil
+	return numPaths(g, nil, current, func(stack []string, next string) bool {
+		return strings.ToLower(next) != next || !in(stack, next)
+	}), nil
 }
 
-func numPaths(g map[string][]string, covered map[string]bool, current string) int {
+func Part2(r io.Reader) (ans int, err error) {
+	g, err := getGraph(r)
+	if err != nil {
+		return 0, err
+	}
+	current := "start"
+	return numPaths(g, nil, current, func(stack []string, next string) bool {
+		if strings.ToLower(next) != next {
+			return true
+		}
+		freqs := make(map[string]int)
+		hasDouble := false
+		for _, s := range stack {
+			if strings.ToLower(s) != s {
+				continue
+			}
+			freqs[s]++
+			if freqs[s] > 1 {
+				hasDouble = true
+			}
+		}
+		if freqs[next] == 0 {
+			return true
+		}
+		if freqs[next] == 1 && !hasDouble {
+			return true
+		}
+		return false
+	}), nil
+}
+
+func numPaths(g map[string][]string, stack []string, current string, allow func(stack []string, next string) bool) int {
 	total := 0
 	for _, n := range g[current] {
-		if covered[n] {
+		if n == "start" {
 			continue
 		}
 		if n == "end" {
 			total += 1
-		} else {
-			if strings.ToLower(n) == n {
-				covered[n] = true
-			}
-			total += numPaths(g, covered, n)
-			delete(covered, n)
+			//fmt.Println(stack)
+			continue
 		}
+		if !allow(stack, n) {
+			continue
+		}
+		stack = append(stack, n)
+		total += numPaths(g, stack, n, allow)
+		stack = stack[:len(stack)-1]
 	}
 	return total
+}
+
+func in(stack []string, s string) bool {
+	for _, x := range stack {
+		if x == s {
+			return true
+		}
+	}
+	return false
+}
+
+func doubleLower(stack []string) bool {
+	freqs := make(map[string]bool)
+	for _, s := range stack {
+		if strings.ToLower(s) == s {
+			if freqs[s] {
+				return true
+			}
+		}
+		freqs[s] = true
+	}
+	return false
 }
 
 func getGraph(r io.Reader) (map[string][]string, error) {

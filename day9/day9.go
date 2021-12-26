@@ -4,11 +4,10 @@ import (
 	"advent-of-code/input"
 	"io"
 	"sort"
-	"strconv"
 )
 
 func Part1(r io.Reader) (ans int, err error) {
-	nums, err := getNums(r)
+	nums, err := input.GetNumMatrix(r)
 	if err != nil {
 		return 0, err
 	}
@@ -21,7 +20,7 @@ func Part1(r io.Reader) (ans int, err error) {
 }
 
 func Part2(r io.Reader) (ans int, err error) {
-	nums, err := getNums(r)
+	nums, err := input.GetNumMatrix(r)
 	if err != nil {
 		return 0, err
 	}
@@ -67,25 +66,6 @@ func Part2(r io.Reader) (ans int, err error) {
 
 type entry struct {
 	i, j int
-}
-
-func getNums(r io.Reader) ([][]int, error) {
-	var nums [][]int
-	if err := input.ForEachLine(r, func(line string) error {
-		var row []int
-		for i := 0; i < len(line); i++ {
-			d, err := strconv.Atoi(line[i : i+1])
-			if err != nil {
-				return err
-			}
-			row = append(row, d)
-		}
-		nums = append(nums, row)
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-	return nums, nil
 }
 
 func lowPoints(nums [][]int) []entry {

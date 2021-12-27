@@ -33,6 +33,73 @@ func Part1(r io.Reader) (ans int, err error) {
 	return sumOfVersions, nil
 }
 
+func Part2(r io.Reader) (ans int, err error) {
+	text, err := toBinary(r)
+	if err != nil {
+		return 0, nil
+	}
+	packet := parsePacket(text)
+	return calculate(packet), nil
+}
+
+func calculate(packet *Packet) int {
+	switch packet.Type {
+	case 0:
+		// sum
+		sum := 0
+		for _, c := range packet.Children {
+			sum += calculate(c)
+		}
+		return sum
+	case 1:
+		// product
+		product := 1
+		for _, c := range packet.Children {
+			product *= calculate(c)
+		}
+		return product
+	case 2:
+		// min
+		min := calculate(packet.Children[0])
+		for _, c := range packet.Children[1:] {
+			if val := calculate(c); val < min {
+				min = val
+			}
+		}
+		return min
+	case 3:
+		// max
+		max := calculate(packet.Children[0])
+		for _, c := range packet.Children[1:] {
+			if val := calculate(c); val > max {
+				max = val
+			}
+		}
+		return max
+	case 4:
+		return packet.Value
+	case 5:
+		// >
+		if calculate(packet.Children[0]) > calculate(packet.Children[1]) {
+			return 1
+		}
+		return 0
+	case 6:
+		// <
+		if calculate(packet.Children[0]) < calculate(packet.Children[1]) {
+			return 1
+		}
+		return 0
+	case 7:
+		// =
+		if calculate(packet.Children[0]) == calculate(packet.Children[1]) {
+			return 1
+		}
+		return 0
+	}
+	panic("bad input")
+}
+
 func toBinary(r io.Reader) (string, error) {
 	hexText, err := ioutil.ReadAll(r)
 	if err != nil {

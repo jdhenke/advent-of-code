@@ -62,6 +62,7 @@ func main() {
 		{13, 1}: day13.Part1,
 		{13, 2}: day13.Part2,
 		{14, 1}: day14.Part1,
+		{14, 2}: day14.Part2,
 	}
 	solverFunc, ok := solvers[entry{*day, *part}]
 	if !ok {

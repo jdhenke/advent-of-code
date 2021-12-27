@@ -37,21 +37,64 @@ func (q *queue) Pop() interface{} {
 	return item
 }
 
-func Part1(r io.Reader) (ans int, err error) {
+type Grid struct {
+	Nums [][]int
+	Rows int
+	Cols int
+}
+
+func (g *Grid) Get(i, j int) int {
+	if i < 0 || i >= g.Rows || j < 0 || j >= g.Cols {
+		panic("bad location")
+	}
+	val := g.Nums[i%len(g.Nums)][j%len(g.Nums[0])]
+	for n := 0; n < i/len(g.Nums)+j/len(g.Nums[0]); n++ {
+		val++
+		if val > 9 {
+			val = 1
+		}
+	}
+	return val
+}
+
+func getGraph(r io.Reader) (*Grid, error) {
 	nums, err := input.GetNumMatrix(r)
+	if err != nil {
+		return nil, err
+	}
+	return &Grid{
+		Nums: nums,
+		Rows: len(nums),
+		Cols: len(nums[0]),
+	}, nil
+}
+
+func Part1(r io.Reader) (ans int, err error) {
+	return day15(r, 1)
+}
+
+func Part2(r io.Reader) (ans int, err error) {
+	return day15(r, 5)
+}
+
+func day15(r io.Reader, m int) (ans int, err error) {
+	g, err := getGraph(r)
 	if err != nil {
 		return 0, err
 	}
+	g.Rows *= m
+	g.Cols *= m
+
 	var q queue
 	heap.Push(&q, item{
 		i:    1,
 		j:    0,
-		cost: nums[1][0],
+		cost: g.Get(1, 0),
 	})
 	heap.Push(&q, item{
 		i:    0,
 		j:    1,
-		cost: nums[0][1],
+		cost: g.Get(0, 1),
 	})
 	type entry struct {
 		i, j int
@@ -68,10 +111,10 @@ func Part1(r io.Reader) (ans int, err error) {
 		if e.j > 0 {
 			out = append(out, entry{e.i, e.j - 1})
 		}
-		if e.i < len(nums)-1 {
+		if e.i < g.Rows-1 {
 			out = append(out, entry{e.i + 1, e.j})
 		}
-		if e.j < len(nums[0])-1 {
+		if e.j < g.Cols-1 {
 			out = append(out, entry{e.i, e.j + 1})
 		}
 		return out
@@ -92,14 +135,10 @@ func Part1(r io.Reader) (ans int, err error) {
 			heap.Push(&q, item{
 				i:    n.i,
 				j:    n.j,
-				cost: x.cost + nums[n.i][n.j],
+				cost: x.cost + g.Get(n.i, n.j),
 			})
 			heap.Init(&q)
 		}
 	}
-	return costs[entry{len(nums) - 1, len(nums[0]) - 1}], nil
-}
-
-func Part2(r io.Reader) (ans int, err error) {
-	panic("todo")
+	return costs[entry{g.Rows - 1, g.Cols - 1}], nil
 }

@@ -20,34 +20,53 @@ func (t target) contains(x, y int) bool {
 }
 
 func Part1(r io.Reader) (ans int, err error) {
-	b, err := ioutil.ReadAll(r)
+	t, err := getTarget(r)
 	if err != nil {
 		return 0, err
 	}
+	height, _ := search(t)
+	return height, nil
+}
+
+func Part2(r io.Reader) (ans int, err error) {
+	t, err := getTarget(r)
+	if err != nil {
+		return 0, err
+	}
+	_, hits := search(t)
+	return hits, nil
+}
+
+func getTarget(r io.Reader) (target, error) {
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return target{}, err
+	}
 	m := re.FindStringSubmatch(string(b))
 	if m == nil {
-		return 0, fmt.Errorf("bad input")
+		return target{}, fmt.Errorf("bad input")
 	}
 	x1, x2, y1, y2 := num(m[1]), num(m[2]), num(m[3]), num(m[4])
 	if x2 < 0 {
 		x1, x2 = -x2, -x1
 	}
 	t := target{x1, x2, y1, y2}
-	//simulate(t, 0, 25)
-	//panic("foo")
-	return highest(t), nil
+	return t, nil
 }
 
-func highest(t target) (height int) {
-	for vy := 1; vy <= -t.y1; vy++ {
-		for vx := 1; vx < t.x2; vx++ {
+func search(t target) (height, hits int) {
+	for vy := t.y1; vy <= -t.y1; vy++ {
+		for vx := 0; vx <= t.x2; vx++ {
 			h, hit := simulate(t, vx, vy)
-			if hit && h > height {
-				height = h
+			if hit {
+				hits++
+				if h > height {
+					height = h
+				}
 			}
 		}
 	}
-	return height
+	return height, hits
 }
 
 func simulate(t target, vx, vy int) (height int, hit bool) {

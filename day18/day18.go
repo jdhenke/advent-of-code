@@ -124,6 +124,32 @@ func Part1(r io.Reader) (ans int, err error) {
 	return magnitude(sum), nil
 }
 
+func Part2(r io.Reader) (ans int, err error) {
+	var lines []string
+	if err := input.ForEachLine(r, func(line string) error {
+		lines = append(lines, line)
+		return nil
+	}); err != nil {
+		return 0, err
+	}
+	var max int
+	for i := 0; i < len(lines)-1; i++ {
+		for j := i + 1; j < len(lines); j++ {
+			for _, xs := range [][2]int{
+				{i, j},
+				{j, i},
+			} {
+				s := add(parse(lines[xs[0]]), parse(lines[xs[1]]))
+				s.Reduce()
+				if m := magnitude(s); m > max {
+					max = m
+				}
+			}
+		}
+	}
+	return max, nil
+}
+
 func parse(line string) *SnailFishNumber {
 	if line[0:1] == "[" {
 		// stop when [i:i+1] is the middle comma

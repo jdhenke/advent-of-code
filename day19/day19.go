@@ -47,18 +47,34 @@ func Part1(r io.Reader) (answer int, err error) {
 }
 
 type result struct {
-	negated bool
+	negated      bool
 	offset       int
 	newDimension int
 	oldDimension int
 }
 
 func day19(r io.Reader, n int) (answer int, err error) {
-	vectorSets, err := getVectorSets(r)
+	solved, _, err := solve(r, n)
 	if err != nil {
 		return 0, err
 	}
-	solved := []VectorSet{vectorSets[0]}
+	// find unique number of points
+	uniq := make(map[string]bool)
+	for _, vs := range solved {
+		for _, v := range vs {
+			uniq[v.String()] = true
+		}
+	}
+	return len(uniq), nil
+}
+
+func solve(r io.Reader, n int) (solved []VectorSet, scanners [][]int, err error) {
+	vectorSets, err := getVectorSets(r)
+	if err != nil {
+		return nil, nil, err
+	}
+	solved = []VectorSet{vectorSets[0]}
+	scanners = [][]int{{0, 0, 0}}
 	toMatch := []VectorSet{vectorSets[0]}
 	unsolved := vectorSets[1:]
 
@@ -108,6 +124,11 @@ func day19(r io.Reader, n int) (answer int, err error) {
 		var newUnsolved []VectorSet
 		for i, vs := range unsolved {
 			if rs, ok := matches[i]; ok {
+				offsets := make([]int, len(rs))
+				for _, r := range rs {
+					offsets[r.newDimension] = r.offset
+				}
+				scanners = append(scanners, offsets)
 				vs = vs.translate(rs)
 				toMatch = append(toMatch, vs)
 				solved = append(solved, vs)
@@ -121,18 +142,35 @@ func day19(r io.Reader, n int) (answer int, err error) {
 		}
 	}
 
-	// find unique number of points
-	uniq := make(map[string]bool)
-	for _, vs := range solved {
-		for _, v := range vs {
-			uniq[v.String()] = true
-		}
-	}
-	return len(uniq), nil
+	return solved, scanners, nil
 }
 
 func Part2(r io.Reader) (answer int, err error) {
-	return 0, nil
+	_, scanners, err := solve(r, 12)
+	if err != nil {
+		return 0, err
+	}
+	var max int
+	for i, s1 := range scanners[:len(scanners)-1] {
+		for _, s2 := range scanners[i+1:] {
+			if m := manhattan(s1, s2); m > max {
+				max = m
+			}
+		}
+	}
+	return max, nil
+}
+
+func manhattan(s1, s2 []int) int {
+	var out int
+	for i := range s1 {
+		d := s2[i] - s1[i]
+		if d < 0 {
+			d = -d
+		}
+		out += d
+	}
+	return out
 }
 
 func getVectorSets(r io.Reader) ([]VectorSet, error) {
@@ -175,7 +213,7 @@ func same(v1, v2 []int, n int) (v2Offset int, ok bool) {
 			freqs2 := freqs(v2, j)
 			o := overlap(freqs1, freqs2)
 			if o >= n {
-				return v2[j]-v1[i], true
+				return v2[j] - v1[i], true
 			}
 		}
 	}

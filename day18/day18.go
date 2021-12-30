@@ -165,14 +165,13 @@ func parse(line string) *SnailFishNumber {
 			Left:  parse(line[1:i]),
 			Right: parse(line[i+1 : len(line)-1]),
 		}
-	} else {
-		val, err := strconv.Atoi(line)
-		if err != nil {
-			panic("bad literal number: " + line)
-		}
-		return &SnailFishNumber{
-			Value: &val,
-		}
+	}
+	val, err := strconv.Atoi(line)
+	if err != nil {
+		panic("bad literal number: " + line)
+	}
+	return &SnailFishNumber{
+		Value: &val,
 	}
 }
 

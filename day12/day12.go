@@ -55,7 +55,7 @@ func numPaths(g map[string][]string, stack []string, current string, allow func(
 			continue
 		}
 		if n == "end" {
-			total += 1
+			total ++
 			//fmt.Println(stack)
 			continue
 		}
@@ -74,19 +74,6 @@ func in(stack []string, s string) bool {
 		if x == s {
 			return true
 		}
-	}
-	return false
-}
-
-func doubleLower(stack []string) bool {
-	freqs := make(map[string]bool)
-	for _, s := range stack {
-		if strings.ToLower(s) == s {
-			if freqs[s] {
-				return true
-			}
-		}
-		freqs[s] = true
 	}
 	return false
 }

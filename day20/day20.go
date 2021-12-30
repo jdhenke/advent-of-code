@@ -44,6 +44,10 @@ func (img *Image) Get(step, i, j int) (ans bool) {
 }
 
 func Part1(r io.Reader) (answer int, err error) {
+	return day20(r, 2)
+}
+
+func day20(r io.Reader, steps int) (answer int, err error) {
 	s := bufio.NewScanner(r)
 	s.Scan()
 	key := s.Text()
@@ -74,12 +78,11 @@ func Part1(r io.Reader) (answer int, err error) {
 		img0: img0,
 		memo: make(map[keyType]bool),
 	}
-	steps := 2
 	total := 0
 	for i := minI - steps; i <= maxI+steps; i++ {
 		for j := minJ - steps; j <= maxJ+steps; j++ {
 			if img.Get(steps, i, j) {
-				total += 1
+				total ++
 			}
 		}
 	}
@@ -101,5 +104,5 @@ func max(a, b int) int {
 }
 
 func Part2(r io.Reader) (answer int, err error) {
-	return 0, nil
+	return day20(r, 50)
 }

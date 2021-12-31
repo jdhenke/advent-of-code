@@ -82,7 +82,7 @@ func day20(r io.Reader, steps int) (answer int, err error) {
 	for i := minI - steps; i <= maxI+steps; i++ {
 		for j := minJ - steps; j <= maxJ+steps; j++ {
 			if img.Get(steps, i, j) {
-				total ++
+				total++
 			}
 		}
 	}

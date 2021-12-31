@@ -55,7 +55,7 @@ func numPaths(g map[string][]string, stack []string, current string, allow func(
 			continue
 		}
 		if n == "end" {
-			total ++
+			total++
 			//fmt.Println(stack)
 			continue
 		}

@@ -96,20 +96,27 @@ func segment(r0, r1 [2]int) [][2]int {
 }
 
 func Part1(r io.Reader) (answer int, err error) {
-	allCubes, err := readCubes(r)
-	if err != nil {
-		return 0, err
-	}
-	var cubes []*Cube
-	boundary := &Cube{
+	return day22(r, &Cube{
 		bounds: [3][2]int{
 			{-50, 51},
 			{-50, 51},
 			{-50, 51},
 		},
+	})
+}
+
+func Part2(r io.Reader) (answer int, err error) {
+	return day22(r, nil)
+}
+
+func day22(r io.Reader, boundary *Cube) (answer int, err error) {
+	allCubes, err := readCubes(r)
+	if err != nil {
+		return 0, err
 	}
+	var cubes []*Cube
 	for _, other := range allCubes {
-		if !boundary.Intersects(other) {
+		if boundary != nil && !boundary.Intersects(other) {
 			continue
 		}
 		var newCubes []*Cube
@@ -147,10 +154,6 @@ func readCubes(r io.Reader) ([]*Cube, error) {
 		return nil, err
 	}
 	return cubes, nil
-}
-
-func Part2(r io.Reader) (answer int, err error) {
-	return 0, nil
 }
 
 func parseCube(line string) *Cube {

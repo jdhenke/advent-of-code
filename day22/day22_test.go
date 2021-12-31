@@ -37,6 +37,12 @@ func TestPart1(t *testing.T) {
 	assert.Equal(t, 590784, ans)
 }
 
+func TestPart1_Simple(t *testing.T) {
+	ans, err := day22.Part1(strings.NewReader(`on x=0..9,y=0..9,z=0..9`))
+	require.NoError(t, err)
+	assert.Equal(t, 1000, ans)
+}
+
 func TestPart2(t *testing.T) {
 	ans, err := day22.Part2(strings.NewReader(testData))
 	require.NoError(t, err)

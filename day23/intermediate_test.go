@@ -16,12 +16,37 @@ var testBoard = Board{
 	C2: 31,
 	D1: 21,
 	D2: 40,
+	A3: 12,
+	A4: 13,
+	B3: 22,
+	B4: 23,
+	C3: 32,
+	C4: 33,
+	D3: 42,
+	D4: 43,
 }
 
-func TestSolve(t *testing.T) {
-	ans, ok := solve(testBoard)
-	require.True(t, ok)
-	assert.Equal(t, 12521, ans)
+func TestSolveSolved(t *testing.T) {
+	ans, ok := solve(Board{
+		A1: 10,
+		A2: 11,
+		B1: 20,
+		B2: 21,
+		C1: 30,
+		C2: 31,
+		D1: 40,
+		D2: 41,
+		A3: 12,
+		A4: 13,
+		B3: 22,
+		B4: 23,
+		C3: 32,
+		C4: 33,
+		D3: 42,
+		D4: 43,
+	})
+	assert.True(t, ok)
+	assert.Equal(t, 0, ans)
 }
 
 const testData = `#############

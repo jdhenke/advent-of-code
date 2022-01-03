@@ -8,6 +8,10 @@ import (
 )
 
 func Part1(r io.Reader) (answer int, err error) {
+	return day24(r, true)
+}
+
+func day24(r io.Reader, max bool) (answer int, err error) {
 	b, err := ioutil.ReadAll(r)
 	if err != nil {
 		return 0, err
@@ -26,7 +30,7 @@ func Part1(r io.Reader) (answer int, err error) {
 			stack = stack[:len(stack)-1]
 			leftIncr := num(strings.Split(lines[leftI*linesPerBlock+15], " ")[2])
 			rightIncr := num(strings.Split(lines[i*linesPerBlock+5], " ")[2])
-			digits[leftI], digits[i] = match(leftIncr, rightIncr)
+			digits[leftI], digits[i] = match(leftIncr, rightIncr, max)
 		}
 	}
 	for i := 0; i < numBlocks; i++ {
@@ -36,11 +40,14 @@ func Part1(r io.Reader) (answer int, err error) {
 	return answer, err
 }
 
-func match(left, right int) (int, int) {
-	if left+right <= 0 {
-		return 9, 9 + left + right
+func match(left, right int, max bool) (int, int) {
+	if max {
+		if left+right <= 0 {
+			return 9, 9 + left + right
+		}
+		return 9 - left - right, 9
 	}
-	return 9 - left - right, 9
+	if
 }
 
 func num(s string) int {

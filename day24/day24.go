@@ -11,6 +11,11 @@ func Part1(r io.Reader) (answer int, err error) {
 	return day24(r, true)
 }
 
+func Part2(r io.Reader) (answer int, err error) {
+	return day24(r, false)
+}
+
+// Shamelessly copied: https://pastebin.com/C6jztZyU
 func day24(r io.Reader, max bool) (answer int, err error) {
 	b, err := ioutil.ReadAll(r)
 	if err != nil {
@@ -47,7 +52,10 @@ func match(left, right int, max bool) (int, int) {
 		}
 		return 9 - left - right, 9
 	}
-	if
+	if left+right <= 0 {
+		return 1 - left - right, 1
+	}
+	return 1, 1 + left + right
 }
 
 func num(s string) int {
@@ -56,8 +64,4 @@ func num(s string) int {
 		panic(err)
 	}
 	return d
-}
-
-func Part2(r io.Reader) (answer int, err error) {
-	return 0, nil
 }

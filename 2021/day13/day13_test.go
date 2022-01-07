@@ -1,11 +1,12 @@
 package day13_test
 
 import (
-	"advent-of-code/day13"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"advent-of-code/2021/day13"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testData = `6,10

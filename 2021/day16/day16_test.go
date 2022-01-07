@@ -1,12 +1,13 @@
 package day16_test
 
 import (
-	"advent-of-code/day16"
+	"advent-of-code/2021/day16"
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testData1 = `8A004A801A8002F478`

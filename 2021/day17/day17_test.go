@@ -1,11 +1,12 @@
 package day17_test
 
 import (
-	"advent-of-code/day17"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"advent-of-code/2021/day17"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testData = `target area: x=20..30, y=-10..-5`

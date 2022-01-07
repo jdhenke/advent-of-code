@@ -1,11 +1,12 @@
 package day5_test
 
 import (
-	"advent-of-code/day5"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"advent-of-code/2021/day5"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testData = `0,9 -> 5,9

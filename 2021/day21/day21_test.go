@@ -1,11 +1,12 @@
 package day21_test
 
 import (
-	"advent-of-code/day21"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"advent-of-code/2021/day21"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testData = `Player 1 starting position: 4

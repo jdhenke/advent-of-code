@@ -1,11 +1,12 @@
 package day15_test
 
 import (
-	"advent-of-code/day15"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"advent-of-code/2021/day15"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testData = `1163751742

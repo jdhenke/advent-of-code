@@ -1,10 +1,11 @@
 package day2_test
 
 import (
-	"advent-of-code/day2"
-	"github.com/stretchr/testify/assert"
+	"advent-of-code/2021/day2"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var testData = `forward 5

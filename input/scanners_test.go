@@ -2,10 +2,11 @@ package input_test
 
 import (
 	"advent-of-code/input"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestForEachLine(t *testing.T) {

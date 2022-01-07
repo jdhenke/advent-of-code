@@ -100,7 +100,7 @@ func day15(r io.Reader, m int) (ans int, err error) {
 		i, j int
 	}
 	costs := map[entry]int{
-		entry{0, 0}: 0,
+		{0, 0}: 0,
 	}
 
 	neighbors := func(e entry) []entry {

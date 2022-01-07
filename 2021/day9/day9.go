@@ -43,8 +43,8 @@ func Part2(r io.Reader) (ans int, err error) {
 		return out
 	}
 	basinSize := func(i, j int) int {
-		covered := map[entry]bool{entry{i, j}: true}
-		toCover := []entry{entry{i, j}}
+		covered := map[entry]bool{{i, j}: true}
+		toCover := []entry{{i, j}}
 		for len(toCover) > 0 {
 			e := toCover[0]
 			toCover = toCover[1:]

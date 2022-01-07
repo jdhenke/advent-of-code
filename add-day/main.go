@@ -42,7 +42,7 @@ func Part2(r io.Reader) (answer int, err error) {
 const testFile = `package day$DAY_test
 
 import (
-	"advent-of-code/day$DAY"
+	"advent-of-code/2021/day$DAY"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"strings"
@@ -98,7 +98,7 @@ func createDay(day int) error {
 		}
 		_, _ = fmt.Fprintln(&buf, line)
 		if strings.HasPrefix(line, `import (`) {
-			_, _ = fmt.Fprintln(&buf, fmt.Sprintf(`"advent-of-code/day%d"`, day))
+			_, _ = fmt.Fprintln(&buf, fmt.Sprintf(`"advent-of-code/2021/day%d"`, day))
 		}
 	}
 	if err := ioutil.WriteFile("main.go", buf.Bytes(), 0644); err != nil {

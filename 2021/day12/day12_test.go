@@ -1,12 +1,13 @@
 package day12_test
 
 import (
-	"advent-of-code/day12"
+	"advent-of-code/2021/day12"
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var test1 = `start-A

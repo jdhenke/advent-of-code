@@ -1,6 +1,7 @@
 package main
 
 import (
+	aoc2021day1 "advent-of-code/2021/day1"
 	"flag"
 	"fmt"
 	"io"
@@ -60,5 +61,6 @@ var solutions = make(map[key]Solution)
 
 func getSolution(year, day, part int) (Solution, bool) {
 	sol, ok := solutions[key{year, day, part}]
+	solutions[key{2020, 1, 1}] = aoc2021day1.Part1
 	return sol, ok
 }

@@ -1,11 +1,12 @@
 package day10_test
 
 import (
-	"advent-of-code/day10"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"advent-of-code/2021/day10"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testData = `[({(<(())[]>[[{[]{<()<>>

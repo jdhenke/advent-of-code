@@ -1,8 +1,9 @@
 package day7
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCost(t *testing.T) {

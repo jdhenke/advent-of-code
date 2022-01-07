@@ -2,10 +2,8 @@ package day1_test
 
 import (
 	"advent-of-code/2021/day1"
-	"strings"
+	"advent-of-code/tester"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 var testData = `199
@@ -20,13 +18,15 @@ var testData = `199
 263`
 
 func TestPart1(t *testing.T) {
-	ans, err := day1.Part1(strings.NewReader(testData))
-	assert.NoError(t, err)
-	assert.Equal(t, 7, ans)
+	tester.New(t, day1.Part1).Run(
+		tester.FromString(testData).Want(7),
+		tester.FromFile("input.txt").Want(1791),
+	)
 }
 
 func TestPart2(t *testing.T) {
-	ans, err := day1.Part2(strings.NewReader(testData))
-	assert.NoError(t, err)
-	assert.Equal(t, 5, ans)
+	tester.New(t, day1.Part2).Run(
+		tester.FromString(testData).Want(5),
+		tester.FromFile("input.txt").Want(1822),
+	)
 }

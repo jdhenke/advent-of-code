@@ -2,9 +2,9 @@ package main
 
 import (
 	aoc2021day1 "advent-of-code/2021/day1"
+	"advent-of-code/solution"
 	"flag"
 	"fmt"
-	"io"
 	"log"
 	"os"
 )
@@ -51,16 +51,15 @@ func main() {
 	fmt.Println(ans)
 }
 
-type Solution func(r io.Reader) (ans int, err error)
-
 type key struct {
 	year, day, part int
 }
 
-var solutions = make(map[key]Solution)
-
-func getSolution(year, day, part int) (Solution, bool) {
+func getSolution(year, day, part int) (solution.Func, bool) {
+	solutions := map[key]solution.Func{
+		{2021, 1, 1}: aoc2021day1.Part1,
+		{2021, 1, 2}: aoc2021day1.Part2,
+	}
 	sol, ok := solutions[key{year, day, part}]
-	solutions[key{2020, 1, 1}] = aoc2021day1.Part1
 	return sol, ok
 }

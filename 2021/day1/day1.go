@@ -6,7 +6,7 @@ import (
 )
 
 /*
-Part1
+Part1 Prompt
 
 --- Day 1: Sonar Sweep ---
 You're minding your own business on a ship at sea when the overboard alarm goes
@@ -76,7 +76,7 @@ func Part1(r io.Reader) (answer int, err error) {
 }
 
 /*
-Part2
+Part2 Prompt
 
 Considering every single measurement isn't as useful as you expected: there's
 just too much noise in the data.

@@ -22,7 +22,4 @@ jobs:
       run: go build -v ./...
     
     - name: Check
-      run: ./godelw check
-
-    - name: Test
-      run: go test -v ./...
+      run: ./godelw verify

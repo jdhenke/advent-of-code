@@ -1,13 +1,10 @@
 package day12_test
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/jdhenke/advent-of-code/2021/day12"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/jdhenke/advent-of-code/tester"
 )
 
 var test1 = `start-A
@@ -49,53 +46,19 @@ pj-fs
 start-RW`
 
 func TestPart1(t *testing.T) {
-	for i, tc := range []struct {
-		data string
-		want int
-	}{
-		{
-			data: test1,
-			want: 10,
-		},
-		{
-			data: test2,
-			want: 19,
-		},
-		{
-			data: test3,
-			want: 226,
-		},
-	} {
-		t.Run(fmt.Sprint(i), func(t *testing.T) {
-			got, err := day12.Part1(strings.NewReader(tc.data))
-			require.NoError(t, err)
-			assert.Equal(t, tc.want, got)
-		})
-	}
+	tester.New(t, day12.Part1).Run(
+		tester.FromString(test1).Want(10),
+		tester.FromString(test2).Want(19),
+		tester.FromString(test3).Want(226),
+		tester.FromFile("input.txt").Want(4495),
+	)
 }
 
 func TestPart2(t *testing.T) {
-	for i, tc := range []struct {
-		data string
-		want int
-	}{
-		{
-			data: test1,
-			want: 36,
-		},
-		{
-			data: test2,
-			want: 103,
-		},
-		{
-			data: test3,
-			want: 3509,
-		},
-	} {
-		t.Run(fmt.Sprint(i), func(t *testing.T) {
-			got, err := day12.Part2(strings.NewReader(tc.data))
-			require.NoError(t, err)
-			assert.Equal(t, tc.want, got)
-		})
-	}
+	tester.New(t, day12.Part2).Run(
+		tester.FromString(test1).Want(36),
+		tester.FromString(test2).Want(103),
+		tester.FromString(test3).Want(3509),
+		tester.FromFile("input.txt").Want(131254),
+	)
 }

@@ -233,7 +233,6 @@ func numPaths(g map[string][]string, stack []string, current string, allow func(
 		}
 		if n == "end" {
 			total++
-			//fmt.Println(stack)
 			continue
 		}
 		if !allow(stack, n) {

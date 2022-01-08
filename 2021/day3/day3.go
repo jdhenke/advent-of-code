@@ -1,11 +1,12 @@
 package day3
 
 import (
-	"advent-of-code/input"
 	"fmt"
 	"io"
 	"strconv"
 	"strings"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 /*

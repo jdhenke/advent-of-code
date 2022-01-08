@@ -1,13 +1,13 @@
 package tester
 
 import (
-	"advent-of-code/solution"
 	"fmt"
 	"io"
 	"os"
 	"strings"
 	"testing"
 
+	"github.com/jdhenke/advent-of-code/solution"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

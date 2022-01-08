@@ -1,11 +1,12 @@
 package day22
 
 import (
-	"advent-of-code/input"
 	"io"
 	"regexp"
 	"sort"
 	"strconv"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 // on x=4..48,y=-44..10,z=-45..4

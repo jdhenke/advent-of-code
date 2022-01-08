@@ -1,10 +1,10 @@
 package day21_test
 
 import (
-	"advent-of-code/2021/day21"
 	"strings"
 	"testing"
 
+	"github.com/jdhenke/advent-of-code/2021/day21"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

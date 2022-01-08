@@ -1,10 +1,10 @@
 package input_test
 
 import (
-	"advent-of-code/input"
 	"strings"
 	"testing"
 
+	"github.com/jdhenke/advent-of-code/input"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

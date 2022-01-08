@@ -1,12 +1,13 @@
 package day21
 
 import (
-	"advent-of-code/input"
 	"io"
 	"io/ioutil"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 var re = regexp.MustCompile(`Player \d+ starting position: (\d+)`)

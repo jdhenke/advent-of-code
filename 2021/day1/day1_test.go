@@ -1,9 +1,10 @@
 package day1_test
 
 import (
-	"advent-of-code/2021/day1"
-	"advent-of-code/tester"
 	"testing"
+
+	"github.com/jdhenke/advent-of-code/2021/day1"
+	"github.com/jdhenke/advent-of-code/tester"
 )
 
 var testData = `199

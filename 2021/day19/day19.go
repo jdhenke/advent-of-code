@@ -1,12 +1,13 @@
 package day19
 
 import (
-	"advent-of-code/input"
 	"fmt"
 	"io"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 type Vector []int

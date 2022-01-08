@@ -1,8 +1,9 @@
 package day11
 
 import (
-	"advent-of-code/input"
 	"io"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 type entry struct {

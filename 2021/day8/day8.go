@@ -1,10 +1,11 @@
 package day8
 
 import (
-	"advent-of-code/input"
 	"io"
 	"sort"
 	"strings"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 /*

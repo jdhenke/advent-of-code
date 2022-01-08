@@ -1,9 +1,10 @@
 package day15
 
 import (
-	"advent-of-code/input"
 	"container/heap"
 	"io"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 type item struct {

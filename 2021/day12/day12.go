@@ -1,9 +1,10 @@
 package day12
 
 import (
-	"advent-of-code/input"
 	"io"
 	"strings"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 /*

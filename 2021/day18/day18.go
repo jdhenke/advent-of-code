@@ -1,11 +1,12 @@
 package day18
 
 import (
-	"advent-of-code/input"
 	"bytes"
 	"fmt"
 	"io"
 	"strconv"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 type SnailFishNumber struct {

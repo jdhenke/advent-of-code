@@ -1,9 +1,10 @@
 package day10
 
 import (
-	"advent-of-code/input"
 	"io"
 	"sort"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 var points = map[string]int{

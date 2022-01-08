@@ -1,8 +1,9 @@
 package day2
 
 import (
-	"advent-of-code/input"
 	"io"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 /*

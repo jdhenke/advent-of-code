@@ -1,4 +1,4 @@
-module advent-of-code
+module github.com/jdhenke/advent-of-code
 
 go 1.17
 

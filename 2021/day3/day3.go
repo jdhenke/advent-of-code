@@ -65,13 +65,13 @@ the submarine? (Be sure to represent your answer in decimal, not binary.)
 */
 func Part1(r io.Reader) (ans int, err error) {
 	// aggregate frequencies
-	var freqs []map[string]int
+	var freqs []map[string]int // freqs[index][char] = count
 	if err = input.ForEachLine(r, func(line string) error {
-		for i := 0; i < len(line); i++ {
+		for i := range line {
 			if i >= len(freqs) {
 				freqs = append(freqs, map[string]int{})
 			}
-			c := line[len(line)-i-1 : len(line)-i]
+			c := line[i : i+1]
 			freqs[i][c]++
 		}
 		return nil
@@ -80,8 +80,7 @@ func Part1(r io.Reader) (ans int, err error) {
 	}
 	// create gamma / epsilon things
 	var gamma, epsilon int
-	for i := range freqs {
-		fs := freqs[len(freqs)-i-1]
+	for _, fs := range freqs {
 		gamma <<= 1
 		epsilon <<= 1
 		if fs["1"] > fs["0"] {
@@ -211,17 +210,18 @@ func filter(rs io.ReadSeeker, suffix func(zeroes, ones int) string) (string, err
 		var lastHit string
 		var ones, zeroes int
 		if err := input.ForEachLine(rs, func(line string) error {
-			if strings.HasPrefix(line, prefix) {
-				if len(prefix) < len(line) {
-					if line[len(prefix):len(prefix)+1] == "1" {
-						ones++
-					} else {
-						zeroes++
-					}
-				}
-				numHits++
-				lastHit = line
+			if !strings.HasPrefix(line, prefix) {
+				return nil
 			}
+			if len(prefix) < len(line) {
+				if line[len(prefix):len(prefix)+1] == "1" {
+					ones++
+				} else {
+					zeroes++
+				}
+			}
+			numHits++
+			lastHit = line
 			return nil
 		}); err != nil {
 			return "", err

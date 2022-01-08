@@ -104,7 +104,7 @@ func Part2(r io.Reader) (ans int, err error) {
 }
 
 func day6(r io.Reader, days int) (ans int, err error) {
-	nums, err := input.ReadNumsList(r)
+	nums, err := input.GetNumList(r)
 	if err != nil {
 		return 0, err
 	}

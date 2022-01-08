@@ -2,10 +2,8 @@ package day7
 
 import (
 	"io"
-	"io/ioutil"
-	"sort"
-	"strconv"
-	"strings"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 /*
@@ -62,39 +60,9 @@ Determine the horizontal position that the crabs can align to using the least
 fuel possible. How much fuel must they spend to align to that position?
 */
 func Part1(r io.Reader) (ans int, err error) {
-	nums, err := getNums(r)
-	if err != nil {
-		return 0, err
-	}
-	sort.Slice(nums, func(i, j int) bool {
-		return nums[i] < nums[j]
-	})
-	median := nums[len(nums)/2]
-	cost := 0
-	for _, x := range nums {
-		d := x - median
-		if d < 0 {
-			d = -d
-		}
-		cost += d
-	}
-	return cost, nil
-}
-
-func getNums(r io.Reader) ([]int, error) {
-	var nums []int
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-	for _, s := range strings.Split(string(b), ",") {
-		x, err := strconv.Atoi(s)
-		if err != nil {
-			return nil, err
-		}
-		nums = append(nums, x)
-	}
-	return nums, nil
+	// The median provably the best spot but to reuse the same code this
+	// uses the more general algorithm to allow part 2 to use it as well.
+	return day7(r, part1Cost)
 }
 
 /*
@@ -132,11 +100,15 @@ fuel possible so they can make you an escape route! How much fuel must they
 spend to align to that position?
 */
 func Part2(r io.Reader) (ans int, err error) {
-	nums, err := getNums(r)
+	return day7(r, part2Cost)
+}
+
+func day7(r io.Reader, costFunc func(x1, x2 int) int) (ans int, err error) {
+	nums, err := input.GetNumList(r)
 	if err != nil {
 		return 0, err
 	}
-	min, max := nums[0], nums[1]
+	min, max := nums[0], nums[0]
 	for _, x := range nums {
 		if x < min {
 			min = x
@@ -150,7 +122,7 @@ func Part2(r io.Reader) (ans int, err error) {
 	for x := min; x <= max; x++ {
 		cost := 0
 		for _, n := range nums {
-			cost += moveCost(x, n)
+			cost += costFunc(x, n)
 		}
 		if bestCost == 0 || cost < bestCost {
 			bestCost = cost
@@ -159,7 +131,15 @@ func Part2(r io.Reader) (ans int, err error) {
 	return bestCost, nil
 }
 
-func moveCost(x, n int) int {
+func part1Cost(x, n int) int {
+	d := x - n
+	if d < 0 {
+		d = -d
+	}
+	return d
+}
+
+func part2Cost(x, n int) int {
 	if x == n {
 		return 0
 	}

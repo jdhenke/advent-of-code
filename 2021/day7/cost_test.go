@@ -12,6 +12,6 @@ func TestCost(t *testing.T) {
 		{1, 5, 10},
 		{2, 5, 6},
 	} {
-		assert.Equal(t, tc.cost, moveCost(tc.from, tc.to), tc)
+		assert.Equal(t, tc.cost, part2Cost(tc.from, tc.to), tc)
 	}
 }

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ReadNumsList(r io.Reader) ([]int, error) {
+func GetNumList(r io.Reader) ([]int, error) {
 	var nums []int
 	b, err := ioutil.ReadAll(r)
 	if err != nil {

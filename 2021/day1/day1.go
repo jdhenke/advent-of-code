@@ -33,16 +33,16 @@ floor depth as the sweep looks further and further away from the submarine.
 
 For example, suppose you had the following report:
 
-	199
-	200
-	208
-	210
-	200
-	207
-	240
-	269
-	260
-	263
+    199
+    200
+    208
+    210
+    200
+    207
+    240
+    269
+    260
+    263
 
 This report indicates that, scanning outward from the submarine, the sonar
 sweep found depths of 199, 200, 208, 210, and so on.
@@ -55,16 +55,16 @@ To do this, count the number of times a depth measurement increases from the
 previous measurement. (There is no measurement before the first measurement.)
 In the example above, the changes are as follows:
 
-	199 (N/A - no previous measurement)
-	200 (increased)
-	208 (increased)
-	210 (increased)
-	200 (decreased)
-	207 (increased)
-	240 (increased)
-	269 (increased)
-	260 (decreased)
-	263 (increased)
+    199 (N/A - no previous measurement)
+    200 (increased)
+    208 (increased)
+    210 (increased)
+    200 (decreased)
+    207 (increased)
+    240 (increased)
+    269 (increased)
+    260 (decreased)
+    263 (increased)
 
 In this example, there are 7 measurements that are larger than the previous
 measurement.
@@ -78,22 +78,23 @@ func Part1(r io.Reader) (answer int, err error) {
 /*
 Part2 Prompt
 
+--- Part Two ---
 Considering every single measurement isn't as useful as you expected: there's
 just too much noise in the data.
 
 Instead, consider sums of a three-measurement sliding window. Again considering
 the above example:
 
-	199  A
-	200  A B
-	208  A B C
-	210    B C D
-	200  E   C D
-	207  E F   D
-	240  E F G
-	269    F G H
-	260      G H
-	263        H
+    199  A
+    200  A B
+    208  A B C
+    210    B C D
+    200  E   C D
+    207  E F   D
+    240  E F G
+    269    F G H
+    260      G H
+    263        H
 
 Start by comparing the first and second three-measurement windows. The
 measurements in the first window are marked A (199, 200, 208); their sum is 199
@@ -108,14 +109,14 @@ measurements left to create a new three-measurement sum.
 
 In the above example, the sum of each three-measurement window is as follows:
 
-	A: 607 (N/A - no previous sum)
-	B: 618 (increased)
-	C: 618 (no change)
-	D: 617 (decreased)
-	E: 647 (increased)
-	F: 716 (increased)
-	G: 769 (increased)
-	H: 792 (increased)
+    A: 607 (N/A - no previous sum)
+    B: 618 (increased)
+    C: 618 (no change)
+    D: 617 (decreased)
+    E: 647 (increased)
+    F: 716 (increased)
+    G: 769 (increased)
+    H: 792 (increased)
 
 In this example, there are 5 sums that are larger than the previous sum.
 

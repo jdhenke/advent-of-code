@@ -119,22 +119,18 @@ number of segments (highlighted above).
 In the output values, how many times do digits 1, 4, 7, or 8 appear?
 */
 func Part1(r io.Reader) (ans int, err error) {
+	digits, err := day8(r)
+	if err != nil {
+		return 0, err
+	}
 	num1478 := 0
-	if err := input.ForEachLine(r, func(line string) error {
-		outputStrings := strings.SplitN(line, " | ", 2)[1]
-		for _, s := range strings.Split(outputStrings, " ") {
-			if map[int]bool{
-				2: true,
-				3: true,
-				4: true,
-				7: true,
-			}[len(s)] {
+	for _, line := range digits {
+		for _, d := range line {
+			switch d {
+			case 1, 4, 7, 8:
 				num1478++
 			}
 		}
-		return nil
-	}); err != nil {
-		return 0, err
 	}
 	return num1478, nil
 }
@@ -203,21 +199,39 @@ four-digit output values. What do you get if you add up all of the output
 values?
 */
 func Part2(r io.Reader) (ans int, err error) {
-	sum := 0
-	if err := input.ForEachLine(r, func(line string) error {
-		parts := strings.SplitN(line, " | ", 2)
-		inputs, outputs := parts[0], parts[1]
-		sum += solve(sortItems(strings.Split(inputs, " ")), sortItems(strings.Split(outputs, " ")))
-		return nil
-	}); err != nil {
+	digits, err := day8(r)
+	if err != nil {
 		return 0, err
+	}
+	sum := 0
+	for _, line := range digits {
+		n := 0
+		for _, d := range line {
+			n *= 10
+			n += d
+		}
+		sum += n
 	}
 	return sum, nil
 }
 
-func solve(inputs, outputs []string) int {
+func day8(r io.Reader) ([][]int, error) {
+	var out [][]int
+	if err := input.ForEachLine(r, func(line string) error {
+		parts := strings.SplitN(line, " | ", 2)
+		inputs, outputs := parts[0], parts[1]
+		out = append(out, solveLine(sortItems(strings.Split(inputs, " ")), sortItems(strings.Split(outputs, " "))))
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func solveLine(inputs, outputs []string) []int {
 	options := make(map[string]map[int]bool)
 	answers := make(map[int]string)
+	// solve 1, 4, 7, 8 first
 	for _, c := range inputs {
 		switch len(c) {
 		case 2:
@@ -249,6 +263,7 @@ func solve(inputs, outputs []string) int {
 		}
 	}
 
+	// solve 9
 	for _, c := range inputs {
 		if len(options[c]) == 1 {
 			continue
@@ -261,7 +276,7 @@ func solve(inputs, outputs []string) int {
 		}
 	}
 
-	// narrow down based on knowledge of 1
+	// solve 5
 	for _, c := range inputs {
 		if len(options[c]) == 1 {
 			continue
@@ -288,10 +303,11 @@ func solve(inputs, outputs []string) int {
 			answers[5] = c
 		}
 	}
-
 	if _, ok := answers[5]; !ok {
 		panic("flawed")
 	}
+
+	// solve 6
 	for c, o := range options {
 		if c != answers[5] {
 			delete(o, 5)
@@ -305,6 +321,7 @@ func solve(inputs, outputs []string) int {
 		panic("flawed")
 	}
 
+	// solve 2, 3, 0
 	for c, o := range options {
 		if c != answers[6] {
 			delete(o, 6)
@@ -320,10 +337,9 @@ func solve(inputs, outputs []string) int {
 		}
 	}
 
-	out := 0
+	var out []int
 	for _, o := range outputs {
-		out *= 10
-		out += only(options[o])
+		out = append(out, only(options[o]))
 	}
 	return out
 }

@@ -1,12 +1,10 @@
 package day8_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/jdhenke/advent-of-code/2021/day8"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/jdhenke/advent-of-code/tester"
 )
 
 var testData = `be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
@@ -21,13 +19,15 @@ egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg | gbdfcae bgc cg cgb
 gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce`
 
 func TestPart1(t *testing.T) {
-	got, err := day8.Part1(strings.NewReader(testData))
-	require.NoError(t, err)
-	assert.Equal(t, 26, got)
+	tester.New(t, day8.Part1).Run(
+		tester.FromString(testData).Want(26),
+		tester.FromFile("input.txt").Want(530),
+	)
 }
 
 func TestPart2(t *testing.T) {
-	got, err := day8.Part2(strings.NewReader(testData))
-	require.NoError(t, err)
-	assert.Equal(t, 61229, got)
+	tester.New(t, day8.Part2).Run(
+		tester.FromString(testData).Want(61229),
+		tester.FromFile("input.txt").Want(1051087),
+	)
 }

@@ -1,11 +1,10 @@
 package day2_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/jdhenke/advent-of-code/2021/day2"
-	"github.com/stretchr/testify/assert"
+	"github.com/jdhenke/advent-of-code/tester"
 )
 
 var testData = `forward 5
@@ -16,13 +15,15 @@ down 8
 forward 2`
 
 func TestPart1(t *testing.T) {
-	ans, err := day2.Part1(strings.NewReader(testData))
-	assert.NoError(t, err)
-	assert.Equal(t, 150, ans)
+	tester.New(t, day2.Part1).Run(
+		tester.FromString(testData).Want(150),
+		tester.FromFile("input.txt").Want(1762050),
+	)
 }
 
 func TestPart2(t *testing.T) {
-	ans, err := day2.Part2(strings.NewReader(testData))
-	assert.NoError(t, err)
-	assert.Equal(t, 900, ans)
+	tester.New(t, day2.Part2).Run(
+		tester.FromString(testData).Want(900),
+		tester.FromFile("input.txt").Want(1855892637),
+	)
 }

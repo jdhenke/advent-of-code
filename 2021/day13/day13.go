@@ -199,7 +199,6 @@ func day11(r io.Reader, numFolds int) (ans int, err error) {
 	folds := 0
 	for scan.Scan() && (numFolds == 0 || folds < numFolds) {
 		folds++
-		// fold along y=7
 		m := re.FindStringSubmatch(scan.Text())
 		direction := m[1]
 		num, err := strconv.Atoi(m[2])

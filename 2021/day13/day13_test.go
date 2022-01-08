@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/jdhenke/advent-of-code/2021/day13"
-	"github.com/stretchr/testify/assert"
+	"github.com/jdhenke/advent-of-code/tester"
 	"github.com/stretchr/testify/require"
 )
 
@@ -32,9 +32,10 @@ fold along y=7
 fold along x=5`
 
 func TestPart1(t *testing.T) {
-	got, err := day13.Part1(strings.NewReader(testData))
-	require.NoError(t, err)
-	assert.Equal(t, 17, got)
+	tester.New(t, day13.Part1).Run(
+		tester.FromString(testData).Want(17),
+		tester.FromFile("input.txt").Want(682),
+	)
 }
 
 func TestPart2(t *testing.T) {

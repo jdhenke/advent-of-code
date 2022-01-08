@@ -102,8 +102,8 @@ func getPrompt(year, day, part int, session string) (prompt string, err error) {
 	}
 	t := &traveler{}
 	t.traverse(n, os.Stdout, false, false)
-	if len(t.articles) != 2 {
-		return "", fmt.Errorf("bad number of articles: %v", len(t.articles))
+	if part-1 >= len(t.articles) {
+		return "", fmt.Errorf("could not get requested part; received fewer parts: %v", len(t.articles))
 	}
 	return format(t.articles[part-1]), nil
 }

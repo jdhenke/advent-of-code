@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -64,14 +63,6 @@ Part%d Prompt
 		return err
 	}
 	return nil
-}
-
-func hasComment(year, day, part int) (ok bool, err error) {
-	b, err := exec.Command("go", "doc", fmt.Sprintf("./%d/day%d.Part%d", year, day, part)).CombinedOutput()
-	if err != nil {
-		return false, err
-	}
-	return bytes.Count(b, []byte("\n")) > 3, nil
 }
 
 func getPrompt(year, day, part int, session string) (prompt string, err error) {

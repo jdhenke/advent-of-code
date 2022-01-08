@@ -1,12 +1,10 @@
 package day10_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/jdhenke/advent-of-code/2021/day10"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/jdhenke/advent-of-code/tester"
 )
 
 var testData = `[({(<(())[]>[[{[]{<()<>>
@@ -21,13 +19,15 @@ var testData = `[({(<(())[]>[[{[]{<()<>>
 <{([{{}}[<[[[<>{}]]]>[]]`
 
 func TestPart1(t *testing.T) {
-	got, err := day10.Part1(strings.NewReader(testData))
-	require.NoError(t, err)
-	assert.Equal(t, 26397, got)
+	tester.New(t, day10.Part1).Run(
+		tester.FromString(testData).Want(26397),
+		tester.FromFile("input.txt").Want(370407),
+	)
 }
 
 func TestPart2(t *testing.T) {
-	got, err := day10.Part2(strings.NewReader(testData))
-	require.NoError(t, err)
-	assert.Equal(t, 288957, got)
+	tester.New(t, day10.Part2).Run(
+		tester.FromString(testData).Want(288957),
+		tester.FromFile("input.txt").Want(3249889609),
+	)
 }

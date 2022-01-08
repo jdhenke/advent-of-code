@@ -2,9 +2,8 @@ package day6
 
 import (
 	"io"
-	"io/ioutil"
-	"strconv"
-	"strings"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 /*
@@ -105,17 +104,9 @@ func Part2(r io.Reader) (ans int, err error) {
 }
 
 func day6(r io.Reader, days int) (ans int, err error) {
-	var nums []int
-	b, err := ioutil.ReadAll(r)
+	nums, err := input.ReadNumsList(r)
 	if err != nil {
 		return 0, err
-	}
-	for _, s := range strings.Split(string(b), ",") {
-		x, err := strconv.Atoi(s)
-		if err != nil {
-			return 0, err
-		}
-		nums = append(nums, x)
 	}
 	total := 0
 	for _, x := range nums {

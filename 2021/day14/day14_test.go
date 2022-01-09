@@ -1,12 +1,10 @@
 package day14_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/jdhenke/advent-of-code/2021/day14"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/jdhenke/advent-of-code/tester"
 )
 
 var testData = `NNCB
@@ -29,13 +27,15 @@ CC -> N
 CN -> C`
 
 func TestPart1(t *testing.T) {
-	got, err := day14.Part1(strings.NewReader(testData))
-	require.NoError(t, err)
-	assert.Equal(t, 1588, got)
+	tester.New(t, day14.Part1).Run(
+		tester.FromString(testData).Want(1588),
+		tester.FromFile("input.txt").Want(2509),
+	)
 }
 
 func TestPart2(t *testing.T) {
-	got, err := day14.Part2(strings.NewReader(testData))
-	require.NoError(t, err)
-	assert.Equal(t, 2188189693529, got)
+	tester.New(t, day14.Part2).Run(
+		tester.FromString(testData).Want(2188189693529),
+		tester.FromFile("input.txt").Want(2827627697643),
+	)
 }

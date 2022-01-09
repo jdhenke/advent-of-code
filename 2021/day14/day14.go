@@ -124,14 +124,16 @@ func day14(r io.Reader, steps int) (ans int, err error) {
 		return 0, err
 	}
 
-	type memoEntry struct {
+	type entry struct {
 		text   string
 		rounds int
 	}
-	memo := make(map[memoEntry]map[string]int)
+	memo := make(map[entry]map[string]int)
 	var getCounts func(text string, rounds int) (counts map[string]int)
+
+	// only gets the counts of all new characters introduced
 	getCounts = func(text string, rounds int) (counts map[string]int) {
-		e := memoEntry{
+		e := entry{
 			text:   text,
 			rounds: rounds,
 		}
@@ -159,9 +161,12 @@ func day14(r io.Reader, steps int) (ans int, err error) {
 		return counts
 	}
 	freqs := getCounts(text, steps)
+
+	// update to include the characters in the original text as well
 	for i := 0; i < len(text); i++ {
 		freqs[text[i:i+1]]++
 	}
+
 	var min, max string
 	for c := range freqs {
 		if min == "" || freqs[c] < freqs[min] {

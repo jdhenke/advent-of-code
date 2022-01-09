@@ -271,6 +271,7 @@ func Part2(r io.Reader) (ans int, err error) {
 }
 
 func day15(r io.Reader, m int) (ans int, err error) {
+	// create a graph that represents the literal input scaled by m
 	g, err := getGraph(r)
 	if err != nil {
 		return 0, err
@@ -278,23 +279,17 @@ func day15(r io.Reader, m int) (ans int, err error) {
 	g.Rows *= m
 	g.Cols *= m
 
+	// dijkstra
 	var q queue
 	heap.Push(&q, item{
-		i:    1,
-		j:    0,
-		cost: g.Get(1, 0),
-	})
-	heap.Push(&q, item{
 		i:    0,
-		j:    1,
-		cost: g.Get(0, 1),
+		j:    0,
+		cost: 0, // don't count the risk level of your starting position unless you enter it
 	})
 	type entry struct {
 		i, j int
 	}
-	costs := map[entry]int{
-		{0, 0}: 0,
-	}
+	costs := make(map[entry]int)
 
 	neighbors := func(e entry) []entry {
 		var out []entry
@@ -314,7 +309,7 @@ func day15(r io.Reader, m int) (ans int, err error) {
 	}
 
 	for q.Len() > 0 {
-		x := heap.Remove(&q, 0).(item)
+		x := heap.Pop(&q).(item)
 		e := entry{x.i, x.j}
 		if _, ok := costs[e]; ok {
 			continue
@@ -330,7 +325,6 @@ func day15(r io.Reader, m int) (ans int, err error) {
 				j:    n.j,
 				cost: x.cost + g.Get(n.i, n.j),
 			})
-			heap.Init(&q)
 		}
 	}
 	return costs[entry{g.Rows - 1, g.Cols - 1}], nil

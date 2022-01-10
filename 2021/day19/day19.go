@@ -10,39 +10,6 @@ import (
 	"github.com/jdhenke/advent-of-code/input"
 )
 
-type Vector []int
-
-func (v Vector) String() string {
-	return fmt.Sprint([]int(v))
-}
-
-type VectorSet []Vector
-
-func (vs VectorSet) Column(idx int) []int {
-	var out []int
-	for _, v := range vs {
-		out = append(out, v[idx])
-	}
-	return out
-}
-
-func (vs VectorSet) translate(rs []result) VectorSet {
-	var out VectorSet
-	for _, v := range vs {
-		v2 := make(Vector, len(v))
-		for _, r := range rs {
-			val := v[r.oldDimension]
-			if r.negated {
-				val = -val
-			}
-			val -= r.offset
-			v2[r.newDimension] = val
-		}
-		out = append(out, v2)
-	}
-	return out
-}
-
 /*
 Part1 Prompt
 
@@ -454,105 +421,6 @@ func Part1(r io.Reader) (answer int, err error) {
 	return day19(r, 12)
 }
 
-type result struct {
-	negated      bool
-	offset       int
-	newDimension int
-	oldDimension int
-}
-
-func day19(r io.Reader, n int) (answer int, err error) {
-	solved, _, err := solve(r, n)
-	if err != nil {
-		return 0, err
-	}
-	// find unique number of points
-	uniq := make(map[string]bool)
-	for _, vs := range solved {
-		for _, v := range vs {
-			uniq[v.String()] = true
-		}
-	}
-	return len(uniq), nil
-}
-
-func solve(r io.Reader, n int) (solved []VectorSet, scanners [][]int, err error) {
-	vectorSets, err := getVectorSets(r)
-	if err != nil {
-		return nil, nil, err
-	}
-	solved = []VectorSet{vectorSets[0]}
-	scanners = [][]int{{0, 0, 0}}
-	toMatch := []VectorSet{vectorSets[0]}
-	unsolved := vectorSets[1:]
-
-	for len(unsolved) > 0 {
-		if len(toMatch) == 0 {
-			panic("ran out of solutions to match against")
-		}
-		m := toMatch[0]
-		toMatch = toMatch[1:]
-		// unsolved index
-		matches := map[int][]result{}
-		for mi := 0; mi < len(m[0]); mi++ { // 3
-			mc := m.Column(mi)
-			sort.Ints(mc)
-			for ui, vs := range unsolved { // 32
-				for uvsi := 0; uvsi < len(vs[0]); uvsi++ { // 3
-					uvsc := vs.Column(uvsi)
-					sort.Ints(uvsc)
-					if offset, ok := same(mc, uvsc, n); ok {
-						matches[ui] = append(matches[ui], result{
-							newDimension: mi,
-							oldDimension: uvsi,
-							negated:      false,
-							offset:       offset,
-						})
-						continue
-					}
-					nvscn := negate(uvsc)
-					sort.Ints(nvscn)
-					if offset, ok := same(mc, nvscn, n); ok {
-						matches[ui] = append(matches[ui], result{
-							newDimension: mi,
-							oldDimension: uvsi,
-							negated:      true,
-							offset:       offset,
-						})
-					}
-				}
-			}
-		}
-		// by count
-		for _, rs := range matches {
-			if len(rs) != len(solved[0][0]) {
-				panic("our hopes that things only match perfectly is flawed")
-			}
-		}
-		var newUnsolved []VectorSet
-		for i, vs := range unsolved {
-			if rs, ok := matches[i]; ok {
-				offsets := make([]int, len(rs))
-				for _, r := range rs {
-					offsets[r.newDimension] = r.offset
-				}
-				scanners = append(scanners, offsets)
-				vs = vs.translate(rs)
-				toMatch = append(toMatch, vs)
-				solved = append(solved, vs)
-			} else {
-				newUnsolved = append(newUnsolved, vs)
-			}
-		}
-		unsolved = newUnsolved
-		if len(toMatch) == 0 {
-			panic("nothing matched")
-		}
-	}
-
-	return solved, scanners, nil
-}
-
 /*
 Part2 Prompt
 
@@ -582,16 +450,150 @@ func Part2(r io.Reader) (answer int, err error) {
 	return max, nil
 }
 
-func manhattan(s1, s2 []int) int {
-	var out int
-	for i := range s1 {
-		d := s2[i] - s1[i]
-		if d < 0 {
-			d = -d
-		}
-		out += d
+type Vector []int
+
+func (v Vector) String() string {
+	return fmt.Sprint([]int(v))
+}
+
+type VectorSet []Vector
+
+func (vs VectorSet) Column(idx int) []int {
+	var out []int
+	for _, v := range vs {
+		out = append(out, v[idx])
 	}
 	return out
+}
+
+func (vs VectorSet) translate(rs []result) VectorSet {
+	var out VectorSet
+	for _, v := range vs {
+		v2 := make(Vector, len(v))
+		for _, r := range rs {
+			val := v[r.oldDimension]
+			if r.negated {
+				val = -val
+			}
+			val -= r.offset
+			v2[r.newDimension] = val
+		}
+		out = append(out, v2)
+	}
+	return out
+}
+
+type result struct {
+	negated      bool
+	offset       int
+	newDimension int
+	oldDimension int
+}
+
+func day19(r io.Reader, n int) (answer int, err error) {
+	solved, _, err := solve(r, n)
+	if err != nil {
+		return 0, err
+	}
+	// find unique number of points
+	uniq := make(map[string]bool)
+	for _, vs := range solved {
+		for _, v := range vs {
+			uniq[v.String()] = true
+		}
+	}
+	return len(uniq), nil
+}
+
+func solve(r io.Reader, n int) (solved []VectorSet, scanners [][]int, err error) {
+	inputVectors, err := getVectorSets(r)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Solve everything relative to the first input vector.
+	solved = []VectorSet{inputVectors[0]}
+	scanners = [][]int{{0, 0, 0}}
+	// Because it is unknown which pairs of scanners are overlapping, we keep toMatch as the set of solved vector sets
+	// that we should try and match against next in case it is the only one that will result in a match for an as yet
+	// unsolved scanner.
+	toMatch := []VectorSet{inputVectors[0]}
+	unsolved := inputVectors[1:]
+
+	for len(unsolved) > 0 {
+		if len(toMatch) == 0 {
+			panic("ran out of solutions to match against")
+		}
+		// Find the next vector set to try and match all the unsolved vector sets against.
+		m := toMatch[0]
+		toMatch = toMatch[1:]
+
+		// Treating each, x, y, z dimensions separately and as given or negated for all unsolved vector sets, try all
+		// these permutations against the current vector set to match, m.
+		matches := map[int][]result{}    // index into unsolved ==> all matches against toMatch
+		for i := 0; i < len(m[0]); i++ { // 3
+			mc := m.Column(i)
+			sort.Ints(mc)
+			for ui, vs := range unsolved { // <32
+				for uvsi := 0; uvsi < len(vs[0]); uvsi++ { // 3
+					uvsc := vs.Column(uvsi)
+					sort.Ints(uvsc)
+					if offset, ok := same(mc, uvsc, n); ok {
+						matches[ui] = append(matches[ui], result{
+							newDimension: i,
+							oldDimension: uvsi,
+							negated:      false,
+							offset:       offset,
+						})
+						continue
+					}
+					nvscn := negate(uvsc)
+					sort.Ints(nvscn)
+					if offset, ok := same(mc, nvscn, n); ok {
+						matches[ui] = append(matches[ui], result{
+							newDimension: i,
+							oldDimension: uvsi,
+							negated:      true,
+							offset:       offset,
+						})
+					}
+				}
+			}
+		}
+
+		// Check the assumption that if one dimension matches, all dimensions match.
+		for _, rs := range matches {
+			if len(rs) != len(solved[0][0]) {
+				panic("our hopes that things only match perfectly is flawed")
+			}
+		}
+
+		// Reorient any of the matching vector sets that we can.
+		var newUnsolved []VectorSet
+		for i, vs := range unsolved {
+			if rs, ok := matches[i]; ok {
+				// Map the offset required for each dimension, ordering the dimensions as the first scanner sees them,
+				// which is exactly the location of the scanner.
+				offsets := make([]int, len(rs))
+				for _, r := range rs {
+					offsets[r.newDimension] = r.offset
+				}
+				scanners = append(scanners, offsets)
+				// Translate the original, unsolved vector set into the same orientation as the first scanner.
+				vs = vs.translate(rs)
+				// Add this correctly oriented scanner to the list of things to match in case one of the still unsolved
+				// scanners will only match against this one.
+				toMatch = append(toMatch, vs)
+				// And save this now correctly oriented scanner to the list of solved scanners.
+				solved = append(solved, vs)
+			} else {
+				newUnsolved = append(newUnsolved, vs)
+			}
+		}
+		unsolved = newUnsolved
+	}
+
+	return solved, scanners, nil
 }
 
 func getVectorSets(r io.Reader) ([]VectorSet, error) {
@@ -626,7 +628,13 @@ func parseVector(line string) Vector {
 	return v
 }
 
-// v1 and v2 must already be sorted, looks for an overlap of n
+// v1 and v2 must already be sorted, looks for an overlap of n.
+//
+// The key insight here is that we do not need to check all the possible offset values to see if there are at least n
+// overlapping functions. This resulted in a solution that was too slow. Instead, we know that there must be at least n
+// overlapping values in each set, and on each side of the sorted set of values the lowest one of these matches must be
+// between [0,len(v)-n]. So, we try all pairs of vectors offsets making the i^th value 0 in that range for each vector
+// then check if that results in vectors that have at least n of the same numbers.
 func same(v1, v2 []int, n int) (v2Offset int, ok bool) {
 	for i := 0; i <= len(v1)-n; i++ {
 		freqs1 := freqs(v1, i)
@@ -651,6 +659,8 @@ func freqs(v []int, i int) map[int]int {
 	return out
 }
 
+// Account for the same number possibly appearing multiple times, so if one vector has 2 and the other has 3, there is
+// overlap of the min of 2 and 3, so 2, for example.
 func overlap(f1, f2 map[int]int) int {
 	var count int
 	for k, v := range f1 {
@@ -670,6 +680,18 @@ func negate(v []int) []int {
 	var out []int
 	for _, x := range v {
 		out = append(out, -x)
+	}
+	return out
+}
+
+func manhattan(s1, s2 []int) int {
+	var out int
+	for i := range s1 {
+		d := s2[i] - s1[i]
+		if d < 0 {
+			d = -d
+		}
+		out += d
 	}
 	return out
 }

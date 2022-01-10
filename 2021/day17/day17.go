@@ -8,17 +8,6 @@ import (
 	"strconv"
 )
 
-// target area: x=20..30, y=-10..-5
-var re = regexp.MustCompile(`target area: x=(.+)\.\.(.+), y=(.+)\.\.(.+)`)
-
-type target struct {
-	x1, x2, y1, y2 int
-}
-
-func (t target) contains(x, y int) bool {
-	return x >= t.x1 && x <= t.x2 && y >= t.y1 && y <= t.y2
-}
-
 /*
 Part1 Prompt
 
@@ -208,6 +197,17 @@ func Part2(r io.Reader) (ans int, err error) {
 	return hits, nil
 }
 
+// target area: x=20..30, y=-10..-5
+var re = regexp.MustCompile(`target area: x=(.+)\.\.(.+), y=(.+)\.\.(.+)`)
+
+type target struct {
+	x1, x2, y1, y2 int
+}
+
+func (t target) contains(x, y int) bool {
+	return x >= t.x1 && x <= t.x2 && y >= t.y1 && y <= t.y2
+}
+
 func getTarget(r io.Reader) (target, error) {
 	b, err := ioutil.ReadAll(r)
 	if err != nil {
@@ -225,19 +225,27 @@ func getTarget(r io.Reader) (target, error) {
 	return t, nil
 }
 
-func search(t target) (height, hits int) {
+// We try all combinations of initial velocities that could possibly hit the target by trying all combinations of
+// viable vx and vy. We know the target extends to the right because during parsing if it's to the left the
+// coordinates are flipped. So we only try 0 to x2 for the vx. We bound it to x2 because if vx > x2, the first step
+// will be beyond the target. Similar for vy, we use a range of y1 (which is negative, so it would basically be shooting
+// at the target directly), an no lower because it would shoot past it on the first step, all the way to -y1. We know
+// we can bound our search to this because of the symmetry of the changes in vy, the path will pass through y=0 with
+// the opposite of the initial vy, so any higher of an initial vy will come back down just as fast and at the next step
+// after passing y=0 it will be past the target.
+func search(t target) (maxHeight, numHits int) {
 	for vy := t.y1; vy <= -t.y1; vy++ {
 		for vx := 0; vx <= t.x2; vx++ {
 			h, hit := simulate(t, vx, vy)
 			if hit {
-				hits++
-				if h > height {
-					height = h
+				numHits++
+				if h > maxHeight {
+					maxHeight = h
 				}
 			}
 		}
 	}
-	return height, hits
+	return maxHeight, numHits
 }
 
 func simulate(t target, vx, vy int) (height int, hit bool) {

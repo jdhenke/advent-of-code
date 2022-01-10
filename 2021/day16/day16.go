@@ -7,14 +7,6 @@ import (
 	"strconv"
 )
 
-type Packet struct {
-	Version  int
-	Type     int
-	Value    int
-	Children []*Packet
-	Size     int // bytes
-}
-
 /*
 Part1 Prompt
 
@@ -245,6 +237,14 @@ func Part2(r io.Reader) (ans int, err error) {
 	return calculate(packet), nil
 }
 
+type Packet struct {
+	Version  int
+	Type     int
+	Value    int
+	Children []*Packet
+	Size     int // bytes
+}
+
 func calculate(packet *Packet) int {
 	switch packet.Type {
 	case 0:
@@ -336,9 +336,13 @@ func toBinary(r io.Reader) (string, error) {
 func parsePacket(text string) *Packet {
 	packetVersion := num(text[0:3])
 	packetType := num(text[3:6])
-	var packetValue int
-	var packetChildren []*Packet
-	var packetSize int
+
+	var (
+		packetValue    int
+		packetChildren []*Packet
+		packetSize     int
+	)
+
 	switch packetType {
 	case 4:
 		last := false

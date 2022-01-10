@@ -80,10 +80,10 @@ func FromFile(path string) *CaseBuilder {
 	}
 }
 
-func FromString(path string) *CaseBuilder {
+func FromString(s string) *CaseBuilder {
 	return &CaseBuilder{
 		cf: func(tc *testCaseOptions) {
-			tc.inputString = &path
+			tc.inputString = &s
 		},
 	}
 }

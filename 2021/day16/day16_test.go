@@ -1,59 +1,31 @@
 package day16_test
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/jdhenke/advent-of-code/2021/day16"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/jdhenke/advent-of-code/tester"
 )
 
-var testData1 = `8A004A801A8002F478`
-
-var testData2 = `620080001611562C8802118E34`
-
-var testData3 = `C0015000016115A2E0802F182340`
-
-var testData4 = `A0016C880162017C3686B18A3D4780`
-
 func TestPart1(t *testing.T) {
-	for i, tc := range []struct {
-		input string
-		want  int
-	}{
-		{testData1, 16},
-		{testData2, 12},
-		{testData3, 23},
-		{testData4, 31},
-	} {
-		t.Run(fmt.Sprint(i), func(t *testing.T) {
-			got, err := day16.Part1(strings.NewReader(tc.input))
-			require.NoError(t, err)
-			assert.Equal(t, tc.want, got)
-		})
-	}
+	tester.New(t, day16.Part1).Run(
+		tester.FromString(`8A004A801A8002F478`).Want(16),
+		tester.FromString(`620080001611562C8802118E34`).Want(12),
+		tester.FromString(`C0015000016115A2E0802F182340`).Want(23),
+		tester.FromString(`A0016C880162017C3686B18A3D4780`).Want(31),
+		tester.FromFile("input.txt").Want(965),
+	)
 }
 
 func TestPart2(t *testing.T) {
-	for i, tc := range []struct {
-		input string
-		want  int
-	}{
-		{"C200B40A82", 3},
-		{"04005AC33890", 54},
-		{"880086C3E88112", 7},
-		{"CE00C43D881120", 9},
-		{"D8005AC2A8F0", 1},
-		{"F600BC2D8F", 0},
-		{"9C005AC2F8F0", 0},
-		{"9C0141080250320F1802104A08", 1},
-	} {
-		t.Run(fmt.Sprint(i), func(t *testing.T) {
-			got, err := day16.Part2(strings.NewReader(tc.input))
-			require.NoError(t, err)
-			assert.Equal(t, tc.want, got)
-		})
-	}
+	tester.New(t, day16.Part2).Run(
+		tester.FromString("C200B40A82").Want(3),
+		tester.FromString("04005AC33890").Want(54),
+		tester.FromString("880086C3E88112").Want(7),
+		tester.FromString("CE00C43D881120").Want(9),
+		tester.FromString("D8005AC2A8F0").Want(1),
+		tester.FromString("F600BC2D8F").Want(0),
+		tester.FromString("9C005AC2F8F0").Want(0),
+		tester.FromString("9C0141080250320F1802104A08").Want(1),
+	)
 }

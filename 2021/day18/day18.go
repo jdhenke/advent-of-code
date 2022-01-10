@@ -9,105 +9,6 @@ import (
 	"github.com/jdhenke/advent-of-code/input"
 )
 
-type SnailFishNumber struct {
-	Value *int
-	Left  *SnailFishNumber
-	Right *SnailFishNumber
-}
-
-func (snf *SnailFishNumber) Reduce() {
-	reduced := false
-	for !reduced {
-		// process explosions first
-		var (
-			last               *int
-			explodedRightValue *int
-		)
-		snf.traverse(0, func(depth int, f *SnailFishNumber) (stop bool) {
-			if explodedRightValue != nil && f.Value != nil {
-				*f.Value = *f.Value + *explodedRightValue
-				return true
-			}
-			if depth == 4 && f.Value == nil {
-				// To explode a pair, the pair's left value is added to the first regular number to the left of the
-				// exploding pair (if any), and the pair's right value is added to the first regular number to the right of
-				// the exploding pair (if any). Exploding pairs will always consist of two regular numbers. Then, the entire
-				// exploding pair is replaced with the regular number 0.
-				if last != nil {
-					*last = *last + *f.Left.Value
-				}
-				explodedRightValue = f.Right.Value
-				f.Left = nil
-				f.Right = nil
-				z := 0
-				f.Value = &z
-				return false
-			}
-			// ignore the left child of the thing that's about to be exploded
-			if depth <= 4 && f.Value != nil {
-				last = f.Value
-			}
-			return false
-		})
-		if explodedRightValue != nil {
-			continue
-		}
-
-		// process splits
-		if snf.traverse(0, func(depth int, f *SnailFishNumber) (stop bool) {
-			if f.Value != nil && *f.Value > 9 {
-				val := *f.Value
-				leftVal := val / 2
-				rightVal := (val + 1) / 2
-				f.Left = &SnailFishNumber{Value: &leftVal}
-				f.Right = &SnailFishNumber{Value: &rightVal}
-				f.Value = nil
-				return true
-			}
-			return false
-		}) {
-			continue
-		}
-
-		reduced = true
-	}
-}
-
-func (snf *SnailFishNumber) traverse(depth int, visit func(depth int, f *SnailFishNumber) (stop bool)) (stop bool) {
-	if snf.Left != nil {
-		if snf.Left.traverse(depth+1, visit) {
-			return true
-		}
-	}
-	if visit(depth, snf) {
-		return true
-	}
-	if snf.Right != nil {
-		if snf.Right.traverse(depth+1, visit) {
-			return true
-		}
-	}
-	return false
-}
-
-func (snf *SnailFishNumber) String() string {
-	var buf bytes.Buffer
-	snf.string(&buf)
-	return buf.String()
-}
-
-func (snf *SnailFishNumber) string(w io.Writer) {
-	if snf.Value != nil {
-		_, _ = fmt.Fprint(w, *snf.Value)
-	} else {
-		_, _ = fmt.Fprint(w, "[")
-		snf.Left.string(w)
-		_, _ = fmt.Fprint(w, ",")
-		snf.Right.string(w)
-		_, _ = fmt.Fprint(w, "]")
-	}
-}
-
 /*
 Part1 Prompt
 
@@ -319,7 +220,6 @@ func Part1(r io.Reader) (ans int, err error) {
 		} else {
 			sum = add(sum, snf)
 		}
-		sum.Reduce()
 		return nil
 	}); err != nil {
 		return 0, err
@@ -376,7 +276,6 @@ func Part2(r io.Reader) (ans int, err error) {
 				{j, i},
 			} {
 				s := add(parse(lines[xs[0]]), parse(lines[xs[1]]))
-				s.Reduce()
 				if m := magnitude(s); m > max {
 					max = m
 				}
@@ -386,7 +285,112 @@ func Part2(r io.Reader) (ans int, err error) {
 	return max, nil
 }
 
+type SnailFishNumber struct {
+	Value *int
+	Left  *SnailFishNumber
+	Right *SnailFishNumber
+}
+
+func (snf *SnailFishNumber) Reduce() {
+	reduced := false
+	for !reduced {
+		// process explosions first
+		var (
+			last               *int
+			explodedRightValue *int
+		)
+		snf.traverse(0, func(depth int, f *SnailFishNumber) (stop bool) {
+			if explodedRightValue != nil && f.Value != nil {
+				*f.Value = *f.Value + *explodedRightValue
+				return true
+			}
+			if depth == 4 && f.Value == nil {
+				// To explode a pair, the pair's left value is added to the first regular number to the left of the
+				// exploding pair (if any), and the pair's right value is added to the first regular number to the right of
+				// the exploding pair (if any). Exploding pairs will always consist of two regular numbers. Then, the entire
+				// exploding pair is replaced with the regular number 0.
+				if last != nil {
+					*last = *last + *f.Left.Value
+				}
+				explodedRightValue = f.Right.Value
+				f.Left = nil
+				f.Right = nil
+				z := 0
+				f.Value = &z
+				return false
+			}
+			// Because it's an in-order traversal, if there exists a node that will be exploded, if it has children, its
+			// left child will be traversed first, however that is NOT the node that will end up being left of the
+			// exploded node because it is being exploded. So, we only consider the last node seen that is of depth <= 4
+			// to ignore the nodes that appear in the in order traversal to the left of the node that will explode
+			// before it has exploded but that will not exist after it has exploded.
+			if depth <= 4 && f.Value != nil {
+				last = f.Value
+			}
+			return false
+		})
+		if explodedRightValue != nil {
+			continue
+		}
+
+		// process splits second
+		if snf.traverse(0, func(depth int, f *SnailFishNumber) (stop bool) {
+			if f.Value != nil && *f.Value > 9 {
+				val := *f.Value
+				leftVal := val / 2
+				rightVal := (val + 1) / 2
+				f.Left = &SnailFishNumber{Value: &leftVal}
+				f.Right = &SnailFishNumber{Value: &rightVal}
+				f.Value = nil
+				return true
+			}
+			return false
+		}) {
+			continue
+		}
+
+		reduced = true
+	}
+}
+
+func (snf *SnailFishNumber) traverse(depth int, visit func(depth int, f *SnailFishNumber) (stop bool)) (stop bool) {
+	if snf.Left != nil {
+		if snf.Left.traverse(depth+1, visit) {
+			return true
+		}
+	}
+	if visit(depth, snf) {
+		return true
+	}
+	if snf.Right != nil {
+		if snf.Right.traverse(depth+1, visit) {
+			return true
+		}
+	}
+	return false
+}
+
+func (snf *SnailFishNumber) String() string {
+	var buf bytes.Buffer
+	snf.string(&buf)
+	return buf.String()
+}
+
+func (snf *SnailFishNumber) string(w io.Writer) {
+	if snf.Value != nil {
+		_, _ = fmt.Fprint(w, *snf.Value)
+	} else {
+		_, _ = fmt.Fprint(w, "[")
+		snf.Left.string(w)
+		_, _ = fmt.Fprint(w, ",")
+		snf.Right.string(w)
+		_, _ = fmt.Fprint(w, "]")
+	}
+}
+
 func parse(line string) *SnailFishNumber {
+	// If has a leading bracket, parse it as a snail fish number by finding the bounds in the line of the first
+	// and second children.
 	if line[0:1] == "[" {
 		// stop when [i:i+1] is the middle comma
 		i, depth := 0, 0
@@ -397,25 +401,33 @@ func parse(line string) *SnailFishNumber {
 				depth--
 			}
 		}
-		return &SnailFishNumber{
+		s := &SnailFishNumber{
 			Left:  parse(line[1:i]),
 			Right: parse(line[i+1 : len(line)-1]),
 		}
+		s.Reduce()
+		return s
 	}
+	// Otherwise, assume it's a literal number.
 	val, err := strconv.Atoi(line)
 	if err != nil {
 		panic("bad literal number: " + line)
 	}
-	return &SnailFishNumber{
+
+	s := &SnailFishNumber{
 		Value: &val,
 	}
+	s.Reduce()
+	return s
 }
 
 func add(a, b *SnailFishNumber) *SnailFishNumber {
-	return &SnailFishNumber{
+	s := &SnailFishNumber{
 		Left:  a,
 		Right: b,
 	}
+	s.Reduce()
+	return s
 }
 
 func magnitude(snf *SnailFishNumber) int {

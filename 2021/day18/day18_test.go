@@ -1,13 +1,10 @@
 package day18_test
 
 import (
-	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/jdhenke/advent-of-code/2021/day18"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/jdhenke/advent-of-code/tester"
 )
 
 var testData = `[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
@@ -22,22 +19,15 @@ var testData = `[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
 [[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]`
 
 func TestPart1(t *testing.T) {
-	for i, tc := range []struct {
-		input string
-		want  int
-	}{
-		{testData, 4140},
-	} {
-		t.Run(fmt.Sprint(i), func(t *testing.T) {
-			got, err := day18.Part1(strings.NewReader(tc.input))
-			require.NoError(t, err)
-			assert.Equal(t, tc.want, got)
-		})
-	}
+	tester.New(t, day18.Part1).Run(
+		tester.FromString(testData).Want(4140),
+		tester.FromFile("input.txt").Want(4323),
+	)
 }
 
 func TestPart2(t *testing.T) {
-	got, err := day18.Part2(strings.NewReader(testData))
-	require.NoError(t, err)
-	assert.Equal(t, 3993, got)
+	tester.New(t, day18.Part2).Run(
+		tester.FromString(testData).Want(3993),
+		tester.FromFile("input.txt").Want(4749),
+	)
 }

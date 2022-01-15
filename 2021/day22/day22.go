@@ -9,93 +9,6 @@ import (
 	"github.com/jdhenke/advent-of-code/input"
 )
 
-// on x=4..48,y=-44..10,z=-45..4
-var re = regexp.MustCompile(`(.+) x=(.+)\.\.(.+),y=(.+)\.\.(.+),z=(.+)\.\.(.+)`)
-
-const dims = 3
-
-type Cube struct {
-	bounds [dims][2]int
-	on     bool
-}
-
-func (c *Cube) Intersects(other *Cube) bool {
-	for i := 0; i < dims; i++ {
-		if !overlap(c.bounds[i], other.bounds[i]) {
-			return false
-		}
-	}
-	return true
-}
-
-func overlap(r1, r2 [2]int) bool {
-	return in(r1[0], r2) || in(r1[1]-1, r2) || in(r2[0], r1) || in(r2[1]-1, r1)
-}
-
-func in(x int, r [2]int) bool {
-	return x >= r[0] && x < r[1]
-}
-
-// Split produces the cubes that represent c with other taken out of it
-func (c *Cube) Split(other *Cube) []*Cube {
-	var ranges [dims][][2]int // for each dimension there's three ranges
-	for i := 0; i < dims; i++ {
-		ranges[i] = segment(c.bounds[i], other.bounds[i])
-	}
-	// combine all d0 options with al
-	var f func(i int) [][][2]int
-	f = func(i int) [][][2]int {
-		if i == dims {
-			return [][][2]int{nil}
-		}
-		var out [][][2]int
-		for _, dOpt := range ranges[i] {
-			// combine this di option with all other options for i+1 onward
-			for _, sub := range f(i + 1) {
-				opt := append([][2]int{dOpt}, sub...)
-				out = append(out, opt)
-			}
-		}
-		return out
-	}
-	var out []*Cube
-	for _, b := range f(0) {
-		var a [3][2]int
-		for i := 0; i < dims; i++ {
-			a[i] = b[i]
-		}
-		sub := &Cube{
-			bounds: a,
-			on:     c.on,
-		}
-		if other.Intersects(sub) {
-			continue
-		}
-		if !c.Intersects(sub) {
-			continue
-		}
-		out = append(out, sub)
-	}
-	return out
-}
-
-func segment(r0, r1 [2]int) [][2]int {
-	xs := []int{r0[0], r0[1], r1[0], r1[1]}
-	sort.Ints(xs)
-	var out [][2]int
-	for _, r := range [][2]int{
-		{xs[0], xs[1]},
-		{xs[1], xs[2]},
-		{xs[2], xs[3]},
-	} {
-		if r[1] <= r[0] {
-			continue
-		}
-		out = append(out, r)
-	}
-	return out
-}
-
 /*
 Part1 Prompt
 
@@ -318,30 +231,37 @@ func Part2(r io.Reader) (answer int, err error) {
 	return day22(r, nil)
 }
 
+// number of dimensions we're considering, in this case, x, y, z means 3
+const dims = 3
+
 func day22(r io.Reader, boundary *Cube) (answer int, err error) {
-	allCubes, err := readCubes(r)
+	origCubes, err := readCubes(r)
 	if err != nil {
 		return 0, err
 	}
-	var cubes []*Cube
-	for _, other := range allCubes {
+	// Maintain a list of distinct cubes that do not overlap but capture the space that's defined by each successive
+	// original cube. If a cube intersects with any existing cubes in the list of distinct cubes, break those
+	// overlapping cubes into smaller cubes that capture of the existing cube that is not captured by the new cube.
+	var distinctCubes []*Cube
+	for _, other := range origCubes {
 		if boundary != nil && !boundary.Intersects(other) {
 			continue
 		}
-		var newCubes []*Cube
-		for _, c := range cubes {
+		var newDistinctCubes []*Cube
+		for _, c := range distinctCubes {
 			if c.Intersects(other) {
-				newCubes = append(newCubes, c.Split(other)...)
+				newDistinctCubes = append(newDistinctCubes, c.Split(other)...)
 			} else {
-				newCubes = append(newCubes, c)
+				newDistinctCubes = append(newDistinctCubes, c)
 			}
 		}
-		newCubes = append(newCubes, other)
-		cubes = newCubes
+		newDistinctCubes = append(newDistinctCubes, other)
+		distinctCubes = newDistinctCubes
 	}
 
+	// Sum the volume of distinct cubes that are on.
 	count := 0
-	for _, c := range cubes {
+	for _, c := range distinctCubes {
 		if !c.on {
 			continue
 		}
@@ -354,6 +274,143 @@ func day22(r io.Reader, boundary *Cube) (answer int, err error) {
 	return count, nil
 }
 
+type Cube struct {
+	bounds [dims][2]int // [lower inclusive, upper exclusive)
+	on     bool
+}
+
+func (c *Cube) Intersects(other *Cube) bool {
+	// Overlapping cubes must overlap in all dimensions, otherwise, they don't overlap.
+	for i := 0; i < dims; i++ {
+		if !overlap(c.bounds[i], other.bounds[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+func overlap(r1, r2 [2]int) bool {
+	// Check if the lower or upper bounds from each range are contained in the other range.
+	return in(r1[0], r2) || in(r1[1]-1, r2) || in(r2[0], r1) || in(r2[1]-1, r1)
+}
+
+func in(x int, r [2]int) bool {
+	return x >= r[0] && x < r[1]
+}
+
+// Split produces the cubes that represent c with other taken out of it.
+//
+// This segments each dimension by the boundaries created by the two lines.
+//
+// For example, in 1 dimension, these two ranges:
+//
+//     -------
+//        ------
+//
+// Result in these segments:
+//
+//     ---
+//        ---
+//           ---
+//
+// If the "other" segment was the bottom original line, only the top of those three segments would be returned, becuase
+// the bottom two segments are contained in the other line.
+//
+// Now consider 2 dimensions:
+//
+// +---+
+// | +-+-+
+// +-+-+ |
+//   +---+
+//
+// If the top left rectangle was the existing one and the bottom right was other, the following rectangles would be
+// returned, identified by As, Bs, and Cs.
+//
+// AABBB
+// CC+-+-+
+// CC|   |
+//   +---+
+//
+// Note that the rectangles identified by Xs and Ys were considered in the cross product of the segments but do not
+/// exist in either rectangle, so are ignored.
+//
+// +---+XX
+// | +-+-+
+// +-+-+ |
+// YY+---+
+//
+// Also note that the rectangles identified by Ds, Es, Fs, and Gs are contained in other and so are ignored.
+//
+// +---+
+// | DDEEE
+// +-FFGGG
+//   FFGGG
+//
+// The same process is ultimately applied for all three dimensions, although the algorithm could be used for any number
+// of dimensions.
+func (c *Cube) Split(other *Cube) []*Cube {
+	var ranges [dims][][2]int // dim --> segments
+	for i := 0; i < dims; i++ {
+		ranges[i] = segment(c.bounds[i], other.bounds[i])
+	}
+
+	// generate the cross product of all segments considering dimensions [i,dim)
+	var f func(i int) [][][2]int
+	f = func(i int) [][][2]int {
+		if i == dims {
+			return [][][2]int{nil}
+		}
+		var out [][][2]int
+		for _, dOpt := range ranges[i] {
+			// combine this di option with all other options for i+1 onward
+			for _, sub := range f(i + 1) {
+				opt := append([][2]int{dOpt}, sub...)
+				out = append(out, opt)
+			}
+		}
+		return out
+	}
+	var out []*Cube
+	// generate all sub-cubes considering all dimensions
+	for _, sc := range f(0) {
+		// convert to an array
+		var a [3][2]int
+		for i := 0; i < dims; i++ {
+			a[i] = sc[i]
+		}
+		sub := &Cube{
+			bounds: a,
+			on:     c.on,
+		}
+		if other.Intersects(sub) {
+			continue
+		}
+		if !c.Intersects(sub) {
+			continue
+		}
+		out = append(out, sub)
+	}
+	return out
+}
+
+// Return all non-empty segments created by these two ranges.
+func segment(r0, r1 [2]int) [][2]int {
+	xs := []int{r0[0], r0[1], r1[0], r1[1]}
+	sort.Ints(xs)
+	var out [][2]int
+	for _, r := range [][2]int{
+		{xs[0], xs[1]},
+		{xs[1], xs[2]},
+		{xs[2], xs[3]},
+	} {
+		if r[1] <= r[0] {
+			continue
+		}
+		out = append(out, r)
+	}
+	return out
+}
+
 func readCubes(r io.Reader) ([]*Cube, error) {
 	var cubes []*Cube
 	if err := input.ForEachLine(r, func(line string) error {
@@ -364,6 +421,9 @@ func readCubes(r io.Reader) ([]*Cube, error) {
 	}
 	return cubes, nil
 }
+
+// on x=4..48,y=-44..10,z=-45..4
+var re = regexp.MustCompile(`(.+) x=(.+)\.\.(.+),y=(.+)\.\.(.+),z=(.+)\.\.(.+)`)
 
 func parseCube(line string) *Cube {
 	parts := re.FindStringSubmatch(line)

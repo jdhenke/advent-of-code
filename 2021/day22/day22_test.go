@@ -1,12 +1,10 @@
 package day22_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/jdhenke/advent-of-code/2021/day22"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/jdhenke/advent-of-code/tester"
 )
 
 var testData = `on x=-20..26,y=-36..17,z=-47..7
@@ -33,15 +31,11 @@ on x=-54112..-39298,y=-85059..-49293,z=-27449..7877
 on x=967..23432,y=45373..81175,z=27513..53682`
 
 func TestPart1(t *testing.T) {
-	ans, err := day22.Part1(strings.NewReader(testData))
-	require.NoError(t, err)
-	assert.Equal(t, 590784, ans)
-}
-
-func TestPart1_Simple(t *testing.T) {
-	ans, err := day22.Part1(strings.NewReader(`on x=0..9,y=0..9,z=0..9`))
-	require.NoError(t, err)
-	assert.Equal(t, 1000, ans)
+	tester.New(t, day22.Part1).Run(
+		tester.FromString(`on x=0..9,y=0..9,z=0..9`).Want(1000),
+		tester.FromString(testData).Want(590784),
+		tester.FromFile("input.txt").Want(647076),
+	)
 }
 
 const testData2 = `on x=-5..47,y=-31..22,z=-19..33
@@ -106,7 +100,8 @@ on x=-53470..21291,y=-120233..-33476,z=-44150..38147
 off x=-93533..-4276,y=-16170..68771,z=-104985..-24507`
 
 func TestPart2(t *testing.T) {
-	ans, err := day22.Part2(strings.NewReader(testData2))
-	require.NoError(t, err)
-	assert.Equal(t, 2758514936282235, ans)
+	tester.New(t, day22.Part2).Run(
+		tester.FromString(testData2).Want(2758514936282235),
+		tester.FromFile("input.txt").Want(1233304599156793),
+	)
 }

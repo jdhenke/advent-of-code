@@ -1,25 +1,25 @@
 package day21_test
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/jdhenke/advent-of-code/2021/day21"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/jdhenke/advent-of-code/tester"
 )
 
 var testData = `Player 1 starting position: 4
 Player 2 starting position: 8`
 
 func TestPart1(t *testing.T) {
-	ans, err := day21.Part1(strings.NewReader(testData))
-	require.NoError(t, err)
-	assert.Equal(t, 739785, ans)
+	tester.New(t, day21.Part1).Run(
+		tester.FromString(testData).Want(739785),
+		tester.FromFile("input.txt").Want(903630),
+	)
 }
 
 func TestPart2(t *testing.T) {
-	ans, err := day21.Part2(strings.NewReader(testData))
-	require.NoError(t, err)
-	assert.Equal(t, 444356092776315, ans)
+	tester.New(t, day21.Part2).Run(
+		tester.FromString(testData).Want(444356092776315),
+		tester.FromFile("input.txt").Want(303121579983974),
+	)
 }

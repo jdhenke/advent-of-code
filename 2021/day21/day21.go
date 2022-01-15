@@ -6,8 +6,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/jdhenke/advent-of-code/input"
 )
 
 var re = regexp.MustCompile(`Player \d+ starting position: (\d+)`)
@@ -73,22 +71,14 @@ player wins, what do you get if you multiply the score of the losing player by
 the number of times the die was rolled during the game?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	var scores []int64 // int64 to help
-	locs := make(map[int]int)
-	{
-		var player int
-		if err := input.ForEachLine(r, func(line string) error {
-			scores = append(scores, 0)
-			loc, err := strconv.Atoi(re.FindStringSubmatch(line)[1])
-			if err != nil {
-				return err
-			}
-			locs[player] = loc - 1
-			player++
-			return nil
-		}); err != nil {
-			return 0, err
-		}
+	scores := make([]int64, 2)
+	loc1, loc2, err := getLocs(r)
+	if err != nil {
+		return 0, err
+	}
+	locs := map[int]int{
+		0: loc1 - 1,
+		1: loc2 - 1,
 	}
 	die := 100
 	count := 0
@@ -138,16 +128,7 @@ Using your given starting positions, determine every possible outcome. Find the
 player that wins in more universes; in how many universes does that player win?
 */
 func Part2(r io.Reader) (answer int, err error) {
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		return 0, err
-	}
-	lines := strings.Split(string(b), "\n")
-	loc1, err := strconv.Atoi(re.FindStringSubmatch(lines[0])[1])
-	if err != nil {
-		return 0, err
-	}
-	loc2, err := strconv.Atoi(re.FindStringSubmatch(lines[1])[1])
+	loc1, loc2, err := getLocs(r)
 	if err != nil {
 		return 0, err
 	}
@@ -156,6 +137,23 @@ func Part2(r io.Reader) (answer int, err error) {
 		return int(p1Wins), nil
 	}
 	return int(p2Wins), nil
+}
+
+func getLocs(r io.Reader) (loc1, loc2 int, err error) {
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return 0, 0, err
+	}
+	lines := strings.Split(string(b), "\n")
+	loc1, err = strconv.Atoi(re.FindStringSubmatch(lines[0])[1])
+	if err != nil {
+		return 0, 0, err
+	}
+	loc2, err = strconv.Atoi(re.FindStringSubmatch(lines[1])[1])
+	if err != nil {
+		return 0, 0, err
+	}
+	return loc1, loc2, nil
 }
 
 type key struct {

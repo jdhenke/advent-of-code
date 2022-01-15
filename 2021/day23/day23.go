@@ -1,6 +1,7 @@
 package day23
 
 import (
+	"container/heap"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -8,13 +9,27 @@ import (
 	"sort"
 )
 
-// #############
-// #01.2.3.4.56#
-// ###C#A#B#D### 0
-//   #C#A#D#B#   1
-//   #########
-//    1 2 3 4
-
+// Board represents the state of the board.
+//
+// The different fields are ints representing the location of that type of amphipod on the board e.g. A1 is the first A,
+// B2 is the second B, etc...
+//
+// The values of these fields correspond to the locations in the following way:
+//
+// In the "hallway" the positions are 0,1,2,3,4,5,6 as shown:
+//
+//     #############
+//     #01.2.3.4.56#
+//     ###A#B#C#D### 0 (1s)
+//       #A#B#C#D#   1
+//       #A#B#C#D#   2
+//       #A#B#C#D#   3
+//       #########
+//        1 2 3 4    <-- (10s)
+//
+// In each of their "homes", the positions have a tens value of 1 for A's home, 2 for B's, etc... and a ones value of
+// 0 right next to the hallway, 1 the next position down, etc... So for example, 23 would mean B's bottom most home
+// position.
 type Board struct {
 	A1, A2, B1, B2, C1, C2, D1, D2 int
 	A3, A4, B3, B4, C3, C4, D3, D4 int
@@ -442,6 +457,8 @@ var re = regexp.MustCompile(`#############
   #(.)#(.)#(.)#(.)#
   #########`)
 
+// Returns a board parsed as in part 1 but with the size of part 2, filling in the bottom two rows as already being
+// solved so the same logic can be used to solve both parts.
 func parseBoard(r io.Reader) (Board, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
@@ -484,38 +501,60 @@ func parseBoard(r io.Reader) (Board, error) {
 	return b, nil
 }
 
-var memo = make(map[Board]IntBool)
-
-type IntBool struct {
-	Int  int
-	Bool bool
+type entry struct {
+	board Board
+	cost  int
 }
 
+type queue []entry
+
+func (q queue) Len() int {
+	return len(q)
+}
+
+func (q queue) Less(i, j int) bool {
+	return q[i].cost < q[j].cost
+}
+
+func (q queue) Swap(i, j int) {
+	q[i], q[j] = q[j], q[i]
+}
+
+func (q *queue) Push(x interface{}) {
+	*q = append(*q, x.(entry))
+}
+
+func (q *queue) Pop() interface{} {
+	x := (*q)[len(*q)-1]
+	*q = (*q)[:len(*q)-1]
+	return x
+}
+
+var covered = make(map[Board]bool)
+
+// dijkstra over all board states by cost to get there and return the first, therefore cheapest, solved board path cost.
 func solve(b Board) (ans int, ok bool) {
-	if ans, ok := memo[b]; ok {
-		return ans.Int, ans.Bool
-	}
-	defer func() {
-		memo[b] = IntBool{ans, ok}
-	}()
-	if solved(b) {
-		return 0, true
-	}
-	var cheapest int
-	for next, moveCost := range getAllNext(b) {
-		ans, ok := solve(next)
-		if !ok {
+	q := queue{entry{
+		board: b,
+		cost:  0,
+	}}
+	for len(q) > 0 {
+		e := heap.Pop(&q).(entry)
+		if covered[e.board] {
 			continue
 		}
-		cost := moveCost + ans
-		if cheapest == 0 || cost < cheapest {
-			cheapest = cost
+		covered[e.board] = true
+		if solved(e.board) {
+			return e.cost, true
+		}
+		for nextBoard, moveCost := range getAllNext(e.board) {
+			heap.Push(&q, entry{
+				cost:  e.cost + moveCost,
+				board: nextBoard,
+			})
 		}
 	}
-	if cheapest == 0 {
-		return 0, false
-	}
-	return cheapest, true
+	return 0, false
 }
 
 func solved(b Board) bool {

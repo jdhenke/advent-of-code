@@ -5,44 +5,6 @@ import (
 	"io"
 )
 
-type entry struct {
-	i, j int
-}
-
-type keyType struct {
-	step, i, j int
-}
-
-type Image struct {
-	key  string
-	img0 map[entry]bool
-	memo map[keyType]bool
-}
-
-func (img *Image) Get(step, i, j int) (ans bool) {
-	k := keyType{step, i, j}
-	if ans, ok := img.memo[k]; ok {
-		return ans
-	}
-	defer func() {
-		img.memo[k] = ans
-	}()
-	if step == 0 {
-		e := entry{i, j}
-		return img.img0[e]
-	}
-	num := 0
-	for i2 := i - 1; i2 <= i+1; i2++ {
-		for j2 := j - 1; j2 <= j+1; j2++ {
-			num <<= 1
-			if img.Get(step-1, i2, j2) {
-				num |= 1
-			}
-		}
-	}
-	return img.key[num:num+1] == "#"
-}
-
 /*
 Part1 Prompt
 
@@ -190,6 +152,23 @@ func Part1(r io.Reader) (answer int, err error) {
 	return day20(r, 2)
 }
 
+/*
+Part2 Prompt
+
+--- Part Two ---
+You still can't quite make out the details in the image. Maybe you just didn't
+enhance it enough.
+
+If you enhance the starting input image in the above example a total of 50
+times, 3351 pixels are lit in the final output image.
+
+Start again with the original input image and apply the image enhancement
+algorithm 50 times. How many pixels are lit in the resulting image?
+*/
+func Part2(r io.Reader) (answer int, err error) {
+	return day20(r, 50)
+}
+
 func day20(r io.Reader, steps int) (answer int, err error) {
 	s := bufio.NewScanner(r)
 	s.Scan()
@@ -221,6 +200,11 @@ func day20(r io.Reader, steps int) (answer int, err error) {
 		img0: img0,
 		memo: make(map[keyType]bool),
 	}
+	// The original picture can "expand" by 1 in each direction during each step, so we look at the number of steps
+	// and consider the projected size given the number of steps.
+	//
+	// Note that this assumes we're only looking for an even number of steps, because on the odd steps, technically
+	// because of the infinite nature of things, all the empty pixels at step 0 will be turned on at step 1, 3, etc...
 	total := 0
 	for i := minI - steps; i <= maxI+steps; i++ {
 		for j := minJ - steps; j <= maxJ+steps; j++ {
@@ -230,6 +214,46 @@ func day20(r io.Reader, steps int) (answer int, err error) {
 		}
 	}
 	return total, nil
+}
+
+type entry struct {
+	i, j int
+}
+
+type keyType struct {
+	step, i, j int
+}
+
+type Image struct {
+	key  string
+	img0 map[entry]bool
+	memo map[keyType]bool
+}
+
+// Get uses recursion with memoization because of the infinite nature of the picture, it's hard to know where the
+// boundaries are.
+func (img *Image) Get(step, i, j int) (ans bool) {
+	k := keyType{step, i, j}
+	if ans, ok := img.memo[k]; ok {
+		return ans
+	}
+	defer func() {
+		img.memo[k] = ans
+	}()
+	if step == 0 {
+		e := entry{i, j}
+		return img.img0[e]
+	}
+	num := 0
+	for i2 := i - 1; i2 <= i+1; i2++ {
+		for j2 := j - 1; j2 <= j+1; j2++ {
+			num <<= 1
+			if img.Get(step-1, i2, j2) {
+				num |= 1
+			}
+		}
+	}
+	return img.key[num:num+1] == "#"
 }
 
 func min(a, b int) int {
@@ -244,21 +268,4 @@ func max(a, b int) int {
 		return a
 	}
 	return b
-}
-
-/*
-Part2 Prompt
-
---- Part Two ---
-You still can't quite make out the details in the image. Maybe you just didn't
-enhance it enough.
-
-If you enhance the starting input image in the above example a total of 50
-times, 3351 pixels are lit in the final output image.
-
-Start again with the original input image and apply the image enhancement
-algorithm 50 times. How many pixels are lit in the resulting image?
-*/
-func Part2(r io.Reader) (answer int, err error) {
-	return day20(r, 50)
 }

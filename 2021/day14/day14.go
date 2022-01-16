@@ -111,18 +111,7 @@ func Part2(r io.Reader) (ans int, err error) {
 }
 
 func day14(r io.Reader, steps int) (ans int, err error) {
-	scan := bufio.NewScanner(r)
-	scan.Scan()
-	text := scan.Text()
-	scan.Scan()
-	rules := make(map[string]string)
-	for scan.Scan() {
-		parts := strings.Split(scan.Text(), " -> ")
-		rules[parts[0]] = parts[1]
-	}
-	if err := scan.Err(); err != nil {
-		return 0, err
-	}
+	text, rules, err := parse(r)
 
 	type entry struct {
 		text   string
@@ -177,4 +166,68 @@ func day14(r io.Reader, steps int) (ans int, err error) {
 		}
 	}
 	return freqs[max] - freqs[min], nil
+}
+
+func parse(r io.Reader) (text string, rules map[string]string, err error) {
+	scan := bufio.NewScanner(r)
+	scan.Scan()
+	text = scan.Text()
+	scan.Scan()
+	rules = make(map[string]string)
+	for scan.Scan() {
+		parts := strings.Split(scan.Text(), " -> ")
+		rules[parts[0]] = parts[1]
+	}
+	if err := scan.Err(); err != nil {
+		return "", nil, err
+	}
+	return text, rules, nil
+}
+
+func Day14Pat(r io.Reader, steps int) (ans int, err error) {
+	text, rules, err := parse(r)
+	if err != nil {
+		return 0, err
+	}
+	pairs := make(map[string]int)
+	for i := 0; i+1 < len(text); i++ {
+		pairs[text[i:i+2]]++
+	}
+	for i := 0; i < steps; i++ {
+		diff := make(map[string]int)
+		for p, c := range rules {
+			p1, p2 := p[0:1]+c, c+p[1:2]
+			n := pairs[p]
+			diff[p] -= n
+			diff[p1] += n
+			diff[p2] += n
+		}
+		for k, d := range diff {
+			pairs[k] += d
+		}
+	}
+	chars := make(map[string]int)
+	for p, n := range pairs {
+		l1, l2 := p[0:1], p[1:2]
+		chars[l1] += n
+		chars[l2] += n
+	}
+	min, max := 0, 0
+	for l, n := range chars {
+		// all characters are double counted in pairs except the first and last characters, so increment before halving
+		if l == text[0:1] {
+			n++
+		}
+		if l == text[len(text)-1:] {
+			n++
+		}
+		n /= 2
+		if n > max {
+			max = n
+		}
+		if min == 0 || n < min {
+			min = n
+		}
+	}
+	return max - min, nil
 }

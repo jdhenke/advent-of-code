@@ -41,6 +41,7 @@ func main() {
 	if err := ensure(year, day, part, session); err != nil {
 		log.Fatal(err)
 	}
+	log.Println("Success")
 }
 
 func ensure(year, day, part int, session string) error {

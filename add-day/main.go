@@ -53,8 +53,8 @@ func day$DAY(r io.Reader) (answer int, err error) {
 const testFile = `package day$DAY_test
 
 import (
-	"advent-of-code/$YEAR/day$DAY"
-	"advent-of-code/tester"
+	"github.com/jdhenke/advent-of-code/$YEAR/day$DAY"
+	"github.com/jdhenke/advent-of-code/tester"
 	"testing"
 )
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	aoc2020day1 "advent-of-code/2020/day1"
+	aoc2020day2 "advent-of-code/2020/day2"
 	"flag"
 	"fmt"
 	"log"
@@ -86,6 +87,8 @@ func getSolution(year, day, part int) (solution.Func, bool) {
 	solutions := map[key]solution.Func{
 		{2020, 1, 1}:  aoc2020day1.Part1,
 		{2020, 1, 2}:  aoc2020day1.Part2,
+		{2020, 2, 1}:  aoc2020day2.Part1,
+		{2020, 2, 2}:  aoc2020day2.Part2,
 		{2021, 1, 1}:  aoc2021day1.Part1,
 		{2021, 1, 2}:  aoc2021day1.Part2,
 		{2021, 2, 1}:  aoc2021day2.Part1,

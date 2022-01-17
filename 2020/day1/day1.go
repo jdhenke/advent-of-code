@@ -49,26 +49,76 @@ Of course, your expense report is much larger. Find the two entries that sum to
 2020; what do you get if you multiply them together?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day1(r)
+	return day1(r, 2)
 }
 
+/*
+Part2 Prompt
+
+--- Part Two ---
+The Elves in accounting are thankful for your help; one of them even offers you
+a starfish coin they had left over from a past vacation. They offer you a
+second one if you can find three numbers in your expense report that meet the
+same criteria.
+
+Using the above example again, the three entries that sum to 2020 are 979, 366,
+and 675. Multiplying them together produces the answer, 241861950.
+
+In your expense report, what is the product of the three entries that sum to
+2020?
+*/
 func Part2(r io.Reader) (answer int, err error) {
-	return day1(r)
+	return day1(r, 3)
 }
 
-func day1(r io.Reader) (answer int, err error) {
-	nums := make(map[int]bool)
+func day1(r io.Reader, n int) (answer int, err error) {
+	var nums []int
 	if err := input.ForEachInt(r, func(x int) {
-		y := 2020 - x
-		if nums[y] {
-			answer = x * y
-		}
-		nums[x] = true
+		nums = append(nums, x)
 	}); err != nil {
 		return 0, err
 	}
+	combos(nums, n, 0, func(c []int) {
+		if sum(c) == 2020 {
+			answer = product(c)
+		}
+	})
 	if answer == 0 {
 		return 0, fmt.Errorf("failed to find answer")
 	}
 	return answer, nil
+}
+
+func product(c []int) int {
+	p := 1
+	for _, x := range c {
+		p *= x
+	}
+	return p
+}
+
+func sum(c []int) int {
+	s := 0
+	for _, x := range c {
+		s += x
+	}
+	return s
+}
+
+// Put all combos of size n in [b:] at [b:]
+func combos(nums []int, n, b int, f func(c []int)) {
+	if b+n > len(nums) {
+		return
+	}
+	if n == 0 {
+		f(nums[:b])
+		return
+	}
+
+	// all combos with the first element
+	combos(nums, n-1, b+1, f)
+
+	// all combos without first element
+	nums[len(nums)-1], nums[b] = nums[b], nums[len(nums)-1]
+	combos(nums[:len(nums)-1], n, b, f)
 }

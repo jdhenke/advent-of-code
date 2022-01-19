@@ -130,7 +130,7 @@ func createDay(year, day int) error {
 		}
 		_, _ = fmt.Fprintln(&buf, line)
 		if strings.HasPrefix(line, `import (`) {
-			_, _ = fmt.Fprintln(&buf, fmt.Sprintf("\taoc%dday%d \"advent-of-code/%d/day%d\"", year, day, year, day))
+			_, _ = fmt.Fprintln(&buf, fmt.Sprintf("\taoc%dday%d \"github.com/jdhenke/advent-of-code/%d/day%d\"", year, day, year, day))
 		}
 	}
 	_, _ = buf.Write([]byte("\n"))

@@ -1,14 +1,14 @@
 package main
 
 import (
-	aoc2020day1 "advent-of-code/2020/day1"
-	aoc2020day2 "advent-of-code/2020/day2"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 
+	aoc2020day1 "github.com/jdhenke/advent-of-code/2020/day1"
+	aoc2020day2 "github.com/jdhenke/advent-of-code/2020/day2"
 	aoc2021day1 "github.com/jdhenke/advent-of-code/2021/day1"
 	aoc2021day10 "github.com/jdhenke/advent-of-code/2021/day10"
 	aoc2021day11 "github.com/jdhenke/advent-of-code/2021/day11"

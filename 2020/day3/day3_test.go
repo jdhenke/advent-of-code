@@ -28,7 +28,7 @@ func TestPart1(t *testing.T) {
 
 func TestPart2(t *testing.T) {
 	tester.New(t, day3.Part2).Run(
-		tester.FromString(testData).Want(0),
-		tester.FromFile("input.txt").Want(0),
+		tester.FromString(testData).Want(336),
+		tester.FromFile("input.txt").Want(2421944712),
 	)
 }

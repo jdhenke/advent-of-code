@@ -81,14 +81,41 @@ Starting at the top-left corner of your map and following a slope of right 3
 and down 1, how many trees would you encounter?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day3(r)
+	return day3(r, []slope{{3, 1}})
 }
 
+/*
+Part2 Prompt
+
+--- Part Two ---
+Time to check the rest of the slopes - you need to minimize the probability of
+a sudden arboreal stop, after all.
+
+Determine the number of trees you would encounter if, for each of the following
+slopes, you start at the top-left corner and traverse the map all the way to
+the bottom:
+
+- Right 1, down 1.
+- Right 3, down 1. (This is the slope you already checked.)
+- Right 5, down 1.
+- Right 7, down 1.
+- Right 1, down 2.
+
+In the above example, these slopes would find 2, 7, 3, 4, and 2 tree(s)
+respectively; multiplied together, these produce the answer 336.
+
+What do you get if you multiply together the number of trees encountered on
+each of the listed slopes?
+*/
 func Part2(r io.Reader) (answer int, err error) {
-	return day3(r)
+	return day3(r, []slope{{1, 1}, {3, 1}, {5, 1}, {7, 1}, {1, 2}})
 }
 
-func day3(r io.Reader) (answer int, err error) {
+type slope struct {
+	right, down int
+}
+
+func day3(r io.Reader, slopes []slope) (answer int, err error) {
 	b, err := ioutil.ReadAll(r)
 	if err != nil {
 		return 0, err
@@ -99,13 +126,17 @@ func day3(r io.Reader) (answer int, err error) {
 		x := i*(width+1) + j // +1 for the newline
 		return text[x : x+1]
 	}
-	height := len(text) / (width + 1)
-	i, j := 0, 0
-	for n := 0; n < height; n++ {
-		if get(i, j) == "#" {
-			answer++
+	height := (len(text) + 1) / (width + 1)
+	answer = 1
+	for _, s := range slopes {
+		var trees int
+		for i, j := 0, 0; i < height; i, j = i+s.down, (j+s.right)%width {
+			if get(i, j) == "#" {
+				trees++
+			}
 		}
-		i, j = i+1, (j+3)%width
+		answer *= trees
 	}
+
 	return answer, nil
 }

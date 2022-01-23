@@ -1,10 +1,9 @@
 package day3
 
 import (
-	"bytes"
 	"io"
-	"io/ioutil"
-	"strings"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 /*
@@ -116,22 +115,12 @@ type slope struct {
 }
 
 func day3(r io.Reader, slopes []slope) (answer int, err error) {
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		return 0, err
-	}
-	text := string(bytes.TrimSpace(b))
-	width := strings.Index(text, "\n")
-	get := func(i, j int) string {
-		x := i*(width+1) + j // +1 for the newline
-		return text[x : x+1]
-	}
-	height := (len(text) + 1) / (width + 1)
+	g, err := input.NewGrid(r, input.WithInfiniteColumns())
 	answer = 1
 	for _, s := range slopes {
 		var trees int
-		for i, j := 0, 0; i < height; i, j = i+s.down, (j+s.right)%width {
-			if get(i, j) == "#" {
+		for i, j := 0, 0; i < g.Height(); i, j = i+s.down, j+s.right {
+			if g.Get(i, j) == "#" {
 				trees++
 			}
 		}

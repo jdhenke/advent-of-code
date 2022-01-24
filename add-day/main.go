@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,20 +14,33 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/jdhenke/advent-of-code/ensure-docs/ensuredocs"
 )
 
 func main() {
-	year := flag.Int("year", 0, "year to add")
-	day := flag.Int("day", 0, "day to add")
+	var (
+		year, day int
+	)
+	flag.IntVar(&year, "year", 0, "year to add")
+	flag.IntVar(&day, "day", 0, "day to add")
 	flag.Parse()
-	if *year == 0 {
+	if year == 0 {
 		log.Fatal("Must provide -year flag.")
 	}
-	if *day == 0 {
+	if day == 0 {
 		log.Fatal("Must provide -day flag.")
 	}
-	if err := createDay(*year, *day); err != nil {
+	session := os.Getenv("SESSION")
+	if session == "" {
+		log.Fatal("SESSION env var must be set.")
+	}
+	if err := createDay(year, day, session); err != nil {
 		log.Fatal(err)
+	}
+	if err := ensuredocs.Ensure(year, day, 1, session); err != nil {
+		log.Fatalf("Failed to ensure docs for part 1: %v", err)
 	}
 	log.Println("Success")
 }
@@ -67,12 +81,12 @@ func TestPart1(t *testing.T) {
 	)
 }
 
-func TestPart2(t *testing.T) {
-	tester.New(t, day$DAY.Part2).Run(
-		tester.FromString(testData).Want(0),
-		tester.FromFile("input.txt").Want(0),
-	)
-}
+// func TestPart2(t *testing.T) {
+// 	tester.New(t, day$DAY.Part2).Run(
+// 		tester.FromString(testData).Want(0),
+// 		tester.FromFile("input.txt").Want(0),
+// 	)
+// }
 `
 
 const solverLine = `		{$YEAR, $DAY, 1}: aoc$YEARday$DAY.Part1,
@@ -87,7 +101,7 @@ func sub(data string, year, day int) string {
 	)
 }
 
-func createDay(year, day int) error {
+func createDay(year, day int, session string) error {
 	if err := os.MkdirAll(fmt.Sprint(year), 0755); err != nil {
 		return err
 	}
@@ -137,7 +151,11 @@ func createDay(year, day int) error {
 	if err := ioutil.WriteFile("main.go", buf.Bytes(), 0644); err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(filepath.Join(fmt.Sprint(year), fmt.Sprintf("day%d", day), "input.txt"), []byte{}, 0644); err != nil {
+	inputBytes, err := getInputBytes(year, day, session)
+	if err != nil {
+		return err
+	}
+	if err := ioutil.WriteFile(filepath.Join(fmt.Sprint(year), fmt.Sprintf("day%d", day), "input.txt"), inputBytes, 0644); err != nil {
 		return err
 	}
 	if err := exec.Command("./godelw", "format").Run(); err != nil {
@@ -163,4 +181,29 @@ func num(s string) int {
 		panic(err)
 	}
 	return d
+}
+
+func getInputBytes(year, day int, session string) ([]byte, error) {
+	req, err := http.NewRequest("GET", fmt.Sprintf("https://adventofcode.com/%d/day/%d/input", year, day), nil)
+	if err != nil {
+		return nil, err
+	}
+	req.AddCookie(&http.Cookie{
+		Name:    "session",
+		Value:   session,
+		Path:    "/",
+		Expires: time.Now().Add(10 * 365 * 24 * time.Hour),
+	})
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_, _ = ioutil.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+	}()
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("bad status: %v", resp.Status)
+	}
+	return ioutil.ReadAll(resp.Body)
 }

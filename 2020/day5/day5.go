@@ -1,7 +1,9 @@
 package day5
 
 import (
+	"fmt"
 	"io"
+	"sort"
 
 	"github.com/jdhenke/advent-of-code/input"
 )
@@ -67,24 +69,54 @@ As a sanity check, look through your list of boarding passes. What is the
 highest seat ID on a boarding pass?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day5(r)
-}
-
-func Part2(r io.Reader) (answer int, err error) {
-	return day5(r)
-}
-
-func day5(r io.Reader) (answer int, err error) {
-	if err := input.ForEachLine(r, func(line string) error {
-		id := parseID(line)
+	if err := forEachID(r, func(id int) {
 		if id > answer {
 			answer = id
 		}
-		return nil
 	}); err != nil {
 		return 0, err
 	}
 	return answer, nil
+}
+
+/*
+Part2 Prompt
+
+--- Part Two ---
+Ding! The "fasten seat belt" signs have turned on. Time to find your seat.
+
+It's a completely full flight, so your seat should be the only missing boarding
+pass in your list. However, there's a catch: some of the seats at the very
+front and back of the plane don't exist on this aircraft, so they'll be missing
+from your list as well.
+
+Your seat wasn't at the very front or back, though; the seats with IDs +1 and
+-1 from yours will be in your list.
+
+What is the ID of your seat?
+*/
+func Part2(r io.Reader) (answer int, err error) {
+	var ids []int
+	if err := forEachID(r, func(id int) {
+		ids = append(ids, id)
+	}); err != nil {
+		return 0, err
+	}
+	sort.Ints(ids)
+	for i := 0; i+1 < len(ids); i++ {
+		if ids[i+1]-ids[i] == 2 {
+			return ids[i] + 1, nil
+		}
+	}
+	return 0, fmt.Errorf("could not find a solution")
+}
+
+func forEachID(r io.Reader, f func(id int)) error {
+	return input.ForEachLine(r, func(line string) error {
+		id := parseID(line)
+		f(id)
+		return nil
+	})
 }
 
 func parseID(line string) int {

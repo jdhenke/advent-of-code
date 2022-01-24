@@ -46,7 +46,7 @@ func WithInfiniteColumns() Option {
 	})
 }
 
-func NewGrid(r io.Reader, opts ...Option) (*grid, error) {
+func NewGrid(r io.Reader, opts ...Option) (Grid, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
 		return nil, err

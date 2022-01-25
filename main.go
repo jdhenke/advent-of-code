@@ -15,6 +15,7 @@ import (
 	aoc2020day6 "github.com/jdhenke/advent-of-code/2020/day6"
 	aoc2020day7 "github.com/jdhenke/advent-of-code/2020/day7"
 	aoc2020day8 "github.com/jdhenke/advent-of-code/2020/day8"
+	aoc2020day9 "github.com/jdhenke/advent-of-code/2020/day9"
 	aoc2021day1 "github.com/jdhenke/advent-of-code/2021/day1"
 	aoc2021day10 "github.com/jdhenke/advent-of-code/2021/day10"
 	aoc2021day11 "github.com/jdhenke/advent-of-code/2021/day11"
@@ -107,6 +108,8 @@ func getSolution(year, day, part int) (solution.Func, bool) {
 		{2020, 7, 2}:  aoc2020day7.Part2,
 		{2020, 8, 1}:  aoc2020day8.Part1,
 		{2020, 8, 2}:  aoc2020day8.Part2,
+		{2020, 9, 1}:  aoc2020day9.Part1,
+		{2020, 9, 2}:  aoc2020day9.Part2,
 		{2021, 1, 1}:  aoc2021day1.Part1,
 		{2021, 1, 2}:  aoc2021day1.Part2,
 		{2021, 2, 1}:  aoc2021day2.Part1,

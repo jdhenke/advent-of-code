@@ -3,6 +3,7 @@ package day9
 import (
 	"fmt"
 	"io"
+	"sort"
 
 	"github.com/jdhenke/advent-of-code/input"
 )
@@ -82,21 +83,20 @@ number in the list (after the preamble) which is not the sum of two of the 25
 numbers before it. What is the first number that does not have this property?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return Day9(r, 25)
+	return Part1WithN(r, 25)
 }
 
-func Part2(r io.Reader) (answer int, err error) {
-	return Day9(r, 0)
-}
-
-func Day9(r io.Reader, n int) (answer int, err error) {
+func Part1WithN(r io.Reader, n int) (answer int, err error) {
 	var nums []int
 	if err := input.ForEachInt(r, func(x int) {
 		nums = append(nums, x)
 	}); err != nil {
 		return 0, err
 	}
+	return part1FromNumsWithN(nums, n)
+}
 
+func part1FromNumsWithN(nums []int, n int) (int, error) {
 	rs := New(nums, n)
 	for i := n; i < len(nums); i++ {
 		if !rs.Contains(nums[i]) {
@@ -142,4 +142,80 @@ func (rs *RollingSums) Next() {
 		rs.lookup[val+head]++
 	}
 	rs.tail++
+}
+
+/*
+Part2 Prompt
+
+--- Part Two ---
+The final step in breaking the XMAS encryption relies on the invalid number you
+just found: you must find a contiguous set of at least two numbers in your list
+which sum to the invalid number from step 1.
+
+Again consider the above example:
+
+    35
+    20
+    15
+    25
+    47
+    40
+    62
+    55
+    65
+    95
+    102
+    117
+    150
+    182
+    127
+    219
+    299
+    277
+    309
+    576
+
+In this list, adding up all of the numbers from 15 through 40 produces the
+invalid number from step 1, 127. (Of course, the contiguous set of numbers in
+your actual list might be much longer.)
+
+To find the encryption weakness, add together the smallest and largest number
+in this contiguous range; in this example, these are 15 and 47, producing 62.
+
+What is the encryption weakness in your XMAS-encrypted list of numbers?
+*/
+func Part2(r io.Reader) (answer int, err error) {
+	return Part2WithN(r, 25)
+}
+
+func Part2WithN(r io.Reader, n int) (answer int, err error) {
+	var nums []int
+	if err := input.ForEachInt(r, func(x int) {
+		nums = append(nums, x)
+	}); err != nil {
+		return 0, err
+	}
+	target, err := part1FromNumsWithN(nums, n)
+	if err != nil {
+		return 0, err
+	}
+
+	// find a contiguous set of at least two numbers that sum to target
+	tail, head := 0, 1
+	sum := nums[tail] + nums[head]
+	for {
+		if sum == target {
+			region := nums[tail : head+1]
+			sort.Ints(region)
+			return region[0] + region[len(region)-1], nil
+		}
+		if sum < target {
+			head++
+			sum += nums[head]
+		} else if sum > target {
+			tail++
+			head = tail + 1
+			sum = nums[tail] + nums[head]
+		}
+	}
 }

@@ -30,19 +30,23 @@ var testData = `35
 576`
 
 func TestPart1(t *testing.T) {
-	tester.New(t, func(r io.Reader) (ans int, err error) {
-		return day9.Day9(r, 5)
-	}).Run(
-		tester.FromString(testData).Want(127),
-	)
-	tester.New(t, day9.Part1).Run(
-		tester.FromFile("input.txt").Want(29221323),
-	)
+	t.Run("internal", func(t *testing.T) {
+		tester.New(t, func(r io.Reader) (ans int, err error) {
+			return day9.Part1WithN(r, 5)
+		}).Run(
+			tester.FromString(testData).Want(127),
+		)
+	})
+	tester.New(t, day9.Part1).Run(tester.FromFile("input.txt").Want(29221323))
 }
 
-// func TestPart2(t *testing.T) {
-// 	tester.New(t, day9.Part2).Run(
-// 		tester.FromString(testData).Want(0),
-// 		tester.FromFile("input.txt").Want(0),
-// 	)
-// }
+func TestPart2(t *testing.T) {
+	t.Run("internal", func(t *testing.T) {
+		tester.New(t, func(r io.Reader) (ans int, err error) {
+			return day9.Part2WithN(r, 5)
+		}).Run(
+			tester.FromString(testData).Want(62),
+		)
+	})
+	tester.New(t, day9.Part2).Run(tester.FromFile("input.txt").Want(4389369))
+}

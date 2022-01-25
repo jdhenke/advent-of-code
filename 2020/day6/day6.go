@@ -69,22 +69,73 @@ For each group, count the number of questions to which anyone answered "yes".
 What is the sum of those counts?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day6(r)
+	return day6(r, func(n, x int) bool {
+		return x > 0
+	})
 }
 
+/*
+Part2 Prompt
+
+--- Part Two ---
+As you finish the last group's customs declaration, you notice that you misread
+one word in the instructions:
+
+You don't need to identify the questions to which anyone answered "yes"; you
+need to identify the questions to which everyone answered "yes"!
+
+Using the same example as above:
+
+    abc
+
+    a
+    b
+    c
+
+    ab
+    ac
+
+    a
+    a
+    a
+    a
+
+    b
+
+This list represents answers from five groups:
+
+- In the first group, everyone (all 1 person) answered "yes" to 3 questions: a,
+b, and c.
+- In the second group, there is no question to which everyone answered "yes".
+- In the third group, everyone answered yes to only 1 question, a. Since some
+people did not answer "yes" to b or c, they don't count.
+- In the fourth group, everyone answered yes to only 1 question, a.
+- In the fifth group, everyone (all 1 person) answered "yes" to 1 question, b.
+
+In this example, the sum of these counts is 3 + 0 + 1 + 1 + 1 = 6.
+
+For each group, count the number of questions to which everyone answered "yes".
+What is the sum of those counts?
+*/
 func Part2(r io.Reader) (answer int, err error) {
-	return day6(r)
+	return day6(r, func(n, x int) bool {
+		return n == x
+	})
 }
 
-func day6(r io.Reader) (answer int, err error) {
+func day6(r io.Reader, match func(n, x int) bool) (answer int, err error) {
 	if err := input.ForEachBatch(r, func(batch []string) error {
-		uniqAnswers := make(map[string]bool)
+		counts := make(map[string]int)
 		for _, text := range batch {
 			for i := range text {
-				uniqAnswers[text[i:i+1]] = true
+				counts[text[i:i+1]]++
 			}
 		}
-		answer += len(uniqAnswers)
+		for _, v := range counts {
+			if match(len(batch), v) {
+				answer++
+			}
+		}
 		return nil
 	}); err != nil {
 		return 0, err

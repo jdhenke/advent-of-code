@@ -30,9 +30,9 @@ func TestPart1(t *testing.T) {
 	)
 }
 
-// func TestPart2(t *testing.T) {
-// 	tester.New(t, day6.Part2).Run(
-// 		tester.FromString(testData).Want(0),
-// 		tester.FromFile("input.txt").Want(0),
-// 	)
-// }
+func TestPart2(t *testing.T) {
+	tester.New(t, day6.Part2).Run(
+		tester.FromString(testData).Want(6),
+		tester.FromFile("input.txt").Want(3585),
+	)
+}

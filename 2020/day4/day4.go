@@ -1,12 +1,13 @@
 package day4
 
 import (
-	"bufio"
 	"fmt"
 	"io"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/jdhenke/advent-of-code/input"
 )
 
 /*
@@ -230,29 +231,22 @@ func pid(value string) bool {
 }
 
 func day4(r io.Reader, isValid func(pair map[string]string) bool) (answer int, err error) {
-	scan := bufio.NewScanner(r)
 	var entries []map[string]string
-	current := make(map[string]string)
-	for scan.Scan() {
-		text := scan.Text()
-		if text == "" {
-			entries = append(entries, current)
-			current = make(map[string]string)
-			continue
-		}
-		pairs := strings.Split(text, " ")
-		for _, pair := range pairs {
-			parts := strings.Split(pair, ":")
-			if len(parts) != 2 {
-				return 0, fmt.Errorf("invalid pair: %v", pair)
+	if err := input.ForEachBatch(r, func(batch []string) error {
+		entry := make(map[string]string)
+		for _, text := range batch {
+			pairs := strings.Split(text, " ")
+			for _, pair := range pairs {
+				parts := strings.Split(pair, ":")
+				if len(parts) != 2 {
+					return fmt.Errorf("invalid pair: %v", pair)
+				}
+				entry[parts[0]] = parts[1]
 			}
-			current[parts[0]] = parts[1]
 		}
-	}
-	if len(current) > 0 {
-		entries = append(entries, current)
-	}
-	if err := scan.Err(); err != nil {
+		entries = append(entries, entry)
+		return nil
+	}); err != nil {
 		return 0, err
 	}
 	for _, pair := range entries {

@@ -19,6 +19,7 @@ type Grid interface {
 	Height() int
 	Get(i, j int) string
 	Set(i, j int, s string)
+	Contains(i, j int) bool
 	ForEach(f func(i, j int, s string))
 	ForEachAdj(i, j int, f func(s string))
 }
@@ -122,14 +123,21 @@ func (g *grid) ForEachAdj(i, j int, f func(s string)) {
 		{i + 1, j},
 		{i + 1, j + 1},
 	} {
-		if !g.conf.InfiniteRows && (spot.i < 0 || spot.i >= g.height) {
-			continue
-		}
-		if !g.conf.InfiniteColumns && (spot.j < 0 || spot.j >= g.width) {
+		if !g.Contains(spot.i, spot.j) {
 			continue
 		}
 		f(g.Get(spot.i, spot.j))
 	}
+}
+
+func (g *grid) Contains(i, j int) bool {
+	if !g.conf.InfiniteRows && (i < 0 || i >= g.height) {
+		return false
+	}
+	if !g.conf.InfiniteColumns && (j < 0 || j >= g.width) {
+		return false
+	}
+	return true
 }
 
 func (g *grid) getIndex(i int, j int) int {

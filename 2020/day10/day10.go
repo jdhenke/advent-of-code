@@ -126,26 +126,110 @@ charging outlet, the adapters, and your device. What is the number of 1-jolt
 differences multiplied by the number of 3-jolt differences?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day10(r)
-}
-
-func Part2(r io.Reader) (answer int, err error) {
-	return day10(r)
-}
-
-func day10(r io.Reader) (answer int, err error) {
-	nums := []int{0} // treat input as 0
-	if err := input.ForEachInt(r, func(x int) {
-		nums = append(nums, x)
-	}); err != nil {
+	nums, err := getNums(r)
+	if err != nil {
 		return 0, err
 	}
-	sort.Ints(nums)
 	nums = append(nums, nums[len(nums)-1]+3) // treat output as highest + 3
 	diffs := make(map[int]int)
 	for i := 0; i+1 < len(nums); i++ {
 		diffs[nums[i+1]-nums[i]]++
 	}
 	return diffs[1] * diffs[3], nil
+}
 
+/*
+Part2 Prompt
+
+--- Part Two ---
+To completely determine whether you have enough adapters, you'll need to figure
+out how many different ways they can be arranged. Every arrangement needs to
+connect the charging outlet to your device. The previous rules about when
+adapters can successfully connect still apply.
+
+The first example above (the one that starts with 16, 10, 15) supports the
+following arrangements:
+
+    (0), 1, 4, 5, 6, 7, 10, 11, 12, 15, 16, 19, (22)
+    (0), 1, 4, 5, 6, 7, 10, 12, 15, 16, 19, (22)
+    (0), 1, 4, 5, 7, 10, 11, 12, 15, 16, 19, (22)
+    (0), 1, 4, 5, 7, 10, 12, 15, 16, 19, (22)
+    (0), 1, 4, 6, 7, 10, 11, 12, 15, 16, 19, (22)
+    (0), 1, 4, 6, 7, 10, 12, 15, 16, 19, (22)
+    (0), 1, 4, 7, 10, 11, 12, 15, 16, 19, (22)
+    (0), 1, 4, 7, 10, 12, 15, 16, 19, (22)
+
+(The charging outlet and your device's built-in adapter are shown in
+parentheses.) Given the adapters from the first example, the total number of
+arrangements that connect the charging outlet to your device is 8.
+
+The second example above (the one that starts with 28, 33, 18) has many
+arrangements. Here are a few:
+
+    (0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
+    32, 33, 34, 35, 38, 39, 42, 45, 46, 47, 48, 49, (52)
+
+    (0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
+    32, 33, 34, 35, 38, 39, 42, 45, 46, 47, 49, (52)
+
+    (0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
+    32, 33, 34, 35, 38, 39, 42, 45, 46, 48, 49, (52)
+
+    (0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
+    32, 33, 34, 35, 38, 39, 42, 45, 46, 49, (52)
+
+    (0), 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 17, 18, 19, 20, 23, 24, 25, 28, 31,
+    32, 33, 34, 35, 38, 39, 42, 45, 47, 48, 49, (52)
+
+    (0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
+    46, 48, 49, (52)
+
+    (0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
+    46, 49, (52)
+
+    (0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
+    47, 48, 49, (52)
+
+    (0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
+    47, 49, (52)
+
+    (0), 3, 4, 7, 10, 11, 14, 17, 20, 23, 25, 28, 31, 34, 35, 38, 39, 42, 45,
+    48, 49, (52)
+
+In total, this set of adapters can connect the charging outlet to your device
+in 19208 distinct arrangements.
+
+You glance back down at your bag and try to remember why you brought so many
+adapters; there must be more than a trillion valid ways to arrange them!
+Surely, there must be an efficient way to count the arrangements.
+
+What is the total number of distinct ways you can arrange the adapters to
+connect the charging outlet to your device?
+*/
+func Part2(r io.Reader) (answer int, err error) {
+	nums, err := getNums(r)
+	if err != nil {
+		return 0, err
+	}
+	paths := []int{1}
+	for i := 1; i < len(nums); i++ {
+		// look back at the last three numbers to see which of them can be connected to the i^th adapter
+		n := 0
+		for j := i - 1; j >= 0 && j >= i-3 && nums[i]-nums[j] <= 3; j-- {
+			n += paths[j]
+		}
+		paths = append(paths, n)
+	}
+	return paths[len(nums)-1], nil
+}
+
+func getNums(r io.Reader) (nums []int, err error) {
+	nums = []int{0} // treat input as 0
+	if err := input.ForEachInt(r, func(x int) {
+		nums = append(nums, x)
+	}); err != nil {
+		return nil, err
+	}
+	sort.Ints(nums)
+	return nums, nil
 }

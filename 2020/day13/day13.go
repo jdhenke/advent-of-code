@@ -81,44 +81,161 @@ What is the ID of the earliest bus you can take to the airport multiplied by
 the number of minutes you'll need to wait for that bus?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day13(r)
-}
-
-func Part2(r io.Reader) (answer int, err error) {
-	return day13(r)
-}
-
-func day13(r io.Reader) (answer int, err error) {
-	b, err := ioutil.ReadAll(r)
-	if err != nil {
-		return 0, nil
-	}
-	lines := bytes.Split(bytes.TrimSpace(b), []byte("\n"))
-	if len(lines) != 2 {
-		return 0, fmt.Errorf("bad number of lines in input: %v", len(lines))
-	}
-	l1, l2 := string(lines[0]), string(lines[1])
-	t, err := strconv.Atoi(l1)
+	t, buses, err := parse(r)
 	if err != nil {
 		return 0, err
 	}
-	var buses []int
-	for _, s := range strings.Split(l2, ",") {
-		if s == "x" {
-			continue
-		}
-		id, err := strconv.Atoi(s)
-		if err != nil {
-			return 0, err
-		}
-		buses = append(buses, id)
-	}
 	var minID, minWait int
 	for _, id := range buses {
+		if id == -1 {
+			continue
+		}
 		wait := (id - t%id) % id
 		if minID == 0 || wait < minWait {
 			minID, minWait = id, wait
 		}
 	}
 	return minID * minWait, nil
+}
+
+/*
+Part2 Prompt
+
+--- Part Two ---
+The shuttle company is running a contest: one gold coin for anyone that can
+find the earliest timestamp such that the first bus ID departs at that time and
+each subsequent listed bus ID departs at that subsequent minute. (The first
+line in your input is no longer relevant.)
+
+For example, suppose you have the same list of bus IDs as above:
+
+    7,13,x,x,59,x,31,19
+
+An x in the schedule means there are no constraints on what bus IDs must depart
+at that time.
+
+This means you are looking for the earliest timestamp (called t) such that:
+
+- Bus ID 7 departs at timestamp t.
+- Bus ID 13 departs one minute after timestamp t.
+- There are no requirements or restrictions on departures at two or three
+minutes after timestamp t.
+- Bus ID 59 departs four minutes after timestamp t.
+- There are no requirements or restrictions on departures at five minutes after
+timestamp t.
+- Bus ID 31 departs six minutes after timestamp t.
+- Bus ID 19 departs seven minutes after timestamp t.
+
+The only bus departures that matter are the listed bus IDs at their specific
+offsets from t. Those bus IDs can depart at other times, and other bus IDs can
+depart at those times. For example, in the list above, because bus ID 19 must
+depart seven minutes after the timestamp at which bus ID 7 departs, bus ID 7
+will always also be departing with bus ID 19 at seven minutes after timestamp
+t.
+
+In this example, the earliest timestamp at which this occurs is 1068781:
+
+    time     bus 7   bus 13  bus 59  bus 31  bus 19
+    1068773    .       .       .       .       .
+    1068774    D       .       .       .       .
+    1068775    .       .       .       .       .
+    1068776    .       .       .       .       .
+    1068777    .       .       .       .       .
+    1068778    .       .       .       .       .
+    1068779    .       .       .       .       .
+    1068780    .       .       .       .       .
+    1068781    D       .       .       .       .
+    1068782    .       D       .       .       .
+    1068783    .       .       .       .       .
+    1068784    .       .       .       .       .
+    1068785    .       .       D       .       .
+    1068786    .       .       .       .       .
+    1068787    .       .       .       D       .
+    1068788    D       .       .       .       D
+    1068789    .       .       .       .       .
+    1068790    .       .       .       .       .
+    1068791    .       .       .       .       .
+    1068792    .       .       .       .       .
+    1068793    .       .       .       .       .
+    1068794    .       .       .       .       .
+    1068795    D       D       .       .       .
+    1068796    .       .       .       .       .
+    1068797    .       .       .       .       .
+
+In the above example, bus ID 7 departs at timestamp 1068788 (seven minutes
+after t). This is fine; the only requirement on that minute is that bus ID 19
+departs then, and it does.
+
+Here are some other examples:
+
+- The earliest timestamp that matches the list 17,x,13,19 is 3417.
+- 67,7,59,61 first occurs at timestamp 754018.
+- 67,x,7,59,61 first occurs at timestamp 779210.
+- 67,7,x,59,61 first occurs at timestamp 1261476.
+- 1789,37,47,1889 first occurs at timestamp 1202161486.
+
+However, with so many bus IDs in your list, surely the actual earliest
+timestamp will be larger than 100000000000000!
+
+What is the earliest timestamp such that all of the listed bus IDs depart at
+offsets matching their positions in the list?
+*/
+func Part2(r io.Reader) (answer int, err error) {
+	_, buses, err := parse(r)
+	if err != nil {
+		return 0, err
+	}
+	// Maintain a starting location, "start", that repeats itself every "every", and for each additional bus, find the
+	// new start and every that match all previous buses as well as that bus.
+	start := 1
+	every := 1
+	for offset, bus := range buses {
+		if bus == -1 {
+			continue
+		}
+		solved := false
+		// try each successive location that will work for all previous buses until it works for this bus
+		for n := 0; n < bus; n++ {
+			t := start + n*every
+			wait := (bus - t%bus) % bus // extra % bus to make a match on n = 0 work on the first iteration
+			if wait == offset%bus {     // % bus in case the offset is larger than the bus ID
+				solved = true
+				start = t
+				every *= bus // assumes all inputs are prime
+				break
+			}
+		}
+		if !solved {
+			panic(fmt.Errorf("failed on %v %v", offset, bus))
+		}
+	}
+	return start, nil
+}
+
+func parse(r io.Reader) (t int, buses []int, err error) {
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return 0, nil, nil
+	}
+	lines := bytes.Split(bytes.TrimSpace(b), []byte("\n"))
+	if len(lines) != 2 {
+		return 0, nil, fmt.Errorf("bad number of lines in input: %v", len(lines))
+	}
+	l1, l2 := string(lines[0]), string(lines[1])
+	t, err = strconv.Atoi(l1)
+	if err != nil {
+		return 0, nil, err
+	}
+	for _, s := range strings.Split(l2, ",") {
+		if s == "x" {
+			buses = append(buses, -1)
+			continue
+		}
+		id, err := strconv.Atoi(s)
+		if err != nil {
+			return 0, nil, err
+		}
+		buses = append(buses, id)
+	}
+	return t, buses, nil
 }

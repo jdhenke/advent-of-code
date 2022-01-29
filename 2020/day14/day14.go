@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"sort"
 	"strconv"
 
 	"github.com/jdhenke/advent-of-code/input"
@@ -80,11 +81,57 @@ Execute the initialization program. What is the sum of all values left in
 memory after it completes? (Do not truncate the sum to 36 bits.)
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day14(r)
+	var mask0, mask1 = 1, 0
+	return day14(r, func(s string) {
+		mask0, mask1 = parseMask(s)
+	}, func(mem map[int]int, addr, val int) {
+		val &= mask0
+		val |= mask1
+		mem[addr] = val
+	})
 }
 
 func Part2(r io.Reader) (answer int, err error) {
-	return day14(r)
+	var mask string
+	return day14(r, func(s string) {
+		mask = s
+	}, func(mem map[int]int, rawAddr, val int) {
+		for _, addr := range part2Addresses(mask, rawAddr) {
+			mem[addr] = val
+		}
+	})
+}
+
+func part2Addresses(mask string, addr int) []int {
+	var xs []int
+	for i := range mask {
+		switch mask[i : i+1] {
+		case "0":
+		case "1":
+			addr |= 1 << (len(mask) - 1 - i)
+		case "X":
+			xs = append(xs, len(mask)-1-i)
+		}
+	}
+	var out []int
+	for i := 0; i < 1<<len(xs); i++ {
+		bits := i
+		// set the j^th most significant bit in bits at the j^th location in addr
+		for j := 0; j < len(xs); j++ {
+			// bits    = 1010
+			// addr = 00001111
+			// mask = 0X0X0X0X
+			if bits%2 == 0 {
+				addr &= ^(1 << xs[j])
+			} else {
+				addr |= 1 << xs[j]
+			}
+			bits /= 2
+		}
+		out = append(out, addr)
+	}
+	sort.Ints(out)
+	return out
 }
 
 var (
@@ -92,19 +139,16 @@ var (
 	memRe  = regexp.MustCompile(`mem\[(.*)\] = (.*)`)
 )
 
-func day14(r io.Reader) (answer int, err error) {
+func day14(r io.Reader, handleMask func(s string), handleMem func(mem map[int]int, addr, val int)) (answer int, err error) {
 	mem := make(map[int]int)
-	var mask0, mask1 int
 	if err := input.ForEachLine(r, func(line string) error {
 		if maskRe.MatchString(line) {
 			parts := maskRe.FindStringSubmatch(line)
-			mask0, mask1 = parseMask(parts[1])
+			handleMask(parts[1])
 		} else if memRe.MatchString(line) {
 			parts := memRe.FindStringSubmatch(line)
 			addr, val := num(parts[1]), num(parts[2])
-			val &= mask0
-			val |= mask1
-			mem[addr] = val
+			handleMem(mem, addr, val)
 		} else {
 			return fmt.Errorf("bad line: %v", line)
 		}

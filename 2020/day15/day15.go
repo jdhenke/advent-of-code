@@ -71,14 +71,14 @@ Here are a few more examples:
 Given your starting numbers, what will be the 2020th number spoken?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day15(r)
+	return day15(r, 2020)
 }
 
 func Part2(r io.Reader) (answer int, err error) {
-	return day15(r)
+	return day15(r, 30_000_000)
 }
 
-func day15(r io.Reader) (answer int, err error) {
+func day15(r io.Reader, n int) (answer int, err error) {
 	nums, err := parseNums(r)
 	if err != nil {
 		return 0, err
@@ -88,8 +88,7 @@ func day15(r io.Reader) (answer int, err error) {
 		next   int
 		record = make(map[int]int)
 	)
-
-	for i := 0; i < 2020; i++ {
+	for i := 0; i < n; i++ {
 		if i < len(nums) {
 			spoken = nums[i]
 		} else {

@@ -84,16 +84,60 @@ Consider the validity of the nearby tickets you scanned. What is your ticket
 scanning error rate?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day16(r)
+	invalid, _, err := day16(r, false)
+	return invalid, err
 }
 
+/*
+Part2 Prompt
+
+--- Part Two ---
+Now that you've identified which tickets contain invalid values, discard those
+tickets entirely. Use the remaining valid tickets to determine which field is
+which.
+
+Using the valid ranges for each field, determine what order the fields appear
+on the tickets. The order is consistent between all tickets: if seat is the
+third field, it is the third field on every ticket, including your ticket.
+
+For example, suppose you have the following notes:
+
+    class: 0-1 or 4-19
+    row: 0-5 or 8-19
+    seat: 0-13 or 16-19
+
+    your ticket:
+    11,12,13
+
+    nearby tickets:
+    3,9,18
+    15,1,5
+    5,14,9
+
+Based on the nearby tickets in the above example, the first position must be
+row, the second position must be class, and the third position must be seat;
+you can conclude that in your ticket, class is 12, row is 11, and seat is 13.
+
+Once you work out which field is which, look for the six fields on your ticket
+that start with the word departure. What do you get if you multiply those six
+values together?
+*/
 func Part2(r io.Reader) (answer int, err error) {
-	return day16(r)
+	_, ticket, err := day16(r, true)
+	if err != nil {
+		return 0, err
+	}
+	answer = 1
+	for s, v := range ticket {
+		if strings.HasPrefix(s, "departure") {
+			answer *= v
+		}
+	}
+	return answer, nil
 }
 
 // class: 1-3 or 5-7
-
-var re = regexp.MustCompile(`(\w+): (\d+)-(\d+) or (\d+)-(\d+)`)
+var re = regexp.MustCompile(`(.+): (\d+)-(\d+) or (\d+)-(\d+)`)
 
 type ruleSet map[string]rule
 
@@ -112,9 +156,11 @@ func (r rule) Matches(x int) bool {
 	return (x >= r[0][0] && x <= r[0][1]) || (x >= r[1][0] && x <= r[1][1])
 }
 
-func day16(r io.Reader) (answer int, err error) {
+func day16(r io.Reader, doSolve bool) (invalid int, ticket map[string]int, err error) {
 	var mode int
 	rules := make(ruleSet)
+	var valid [][]int
+	var myTicket []int
 	if err := input.ForEachLine(r, func(line string) error {
 		if line == "" {
 			mode++
@@ -132,23 +178,108 @@ func day16(r io.Reader) (answer int, err error) {
 			if line == "your ticket:" {
 				return nil
 			}
-			// IGNORE FOR NOW
+			myTicket = mustNums(strings.Split(line, ",")...)
 		case 2:
 			if line == "nearby tickets:" {
 				return nil
 			}
 			parts := strings.Split(line, ",")
-			for _, num := range mustNums(parts...) {
+			nums := mustNums(parts...)
+			isValid := true
+			for _, num := range nums {
 				if !rules.Matches(num) {
-					answer += num
+					invalid += num
+					isValid = false
 				}
+			}
+			if isValid {
+				valid = append(valid, nums)
 			}
 		}
 		return nil
 	}); err != nil {
-		return 0, err
+		return 0, nil, err
 	}
-	return answer, nil
+	if doSolve {
+		ticket, err = solve(rules, myTicket, valid)
+		if err != nil {
+			return 0, nil, err
+		}
+	}
+	return invalid, ticket, nil
+}
+
+func solve(rules ruleSet, myTicket []int, tickets [][]int) (map[string]int, error) {
+	// start with all possible options
+	options := make(map[int]map[string]bool)
+	for i := range myTicket {
+		opts := make(map[string]bool)
+		for s := range rules {
+			opts[s] = true
+		}
+		options[i] = opts
+	}
+	done := make(map[int]bool)
+	solved := func() bool {
+		for _, opts := range options {
+			if len(opts) != 1 {
+				return false
+			}
+		}
+		return true
+	}
+	matches := func(name string, i int) bool {
+		for _, ticket := range tickets {
+			if !rules[name].Matches(ticket[i]) {
+				return false
+			}
+		}
+		return true
+	}
+	// remove options until it's solved
+	for !solved() {
+		changed := false
+		// see if any columns contain a valid that would not match one of its existing options and if so, remove that
+		// option
+		for i := 0; i < len(myTicket); i++ {
+			if len(options[i]) == 1 {
+				continue
+			}
+			for s := range options[i] {
+				if !matches(s, i) {
+					delete(options[i], s)
+					changed = true
+				}
+			}
+		}
+		// see if any new columns have been solved and if so, remove that column's answer from all other columns'
+		// options
+		for i, opts := range options {
+			if done[i] {
+				continue
+			}
+			if len(opts) == 1 {
+				ans := only(opts)
+				done[i] = true
+				for j, otherOpts := range options {
+					if i == j {
+						continue
+					}
+					delete(otherOpts, ans)
+				}
+				changed = true
+			}
+		}
+		if !changed {
+			return nil, fmt.Errorf("no solution")
+		}
+	}
+	// convert myTicket into text answers
+	out := make(map[string]int)
+	for i := range myTicket {
+		out[only(options[i])] = myTicket[i]
+	}
+	return out, nil
 }
 
 func mustNums(all ...string) []int {
@@ -161,4 +292,11 @@ func mustNums(all ...string) []int {
 		nums = append(nums, x)
 	}
 	return nums
+}
+
+func only(m map[string]bool) string {
+	for s := range m {
+		return s
+	}
+	panic("empty map")
 }

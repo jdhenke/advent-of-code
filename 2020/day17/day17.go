@@ -1,8 +1,10 @@
 package day17
 
 import (
+	"fmt"
 	"io"
 
+	"github.com/jdhenke/advent-of-code/combo"
 	"github.com/jdhenke/advent-of-code/input"
 )
 
@@ -452,13 +454,18 @@ func Part2(r io.Reader) (answer int, err error) {
 	return day17(r, 4)
 }
 
+const maxDimensions = 4
+
 func day17(r io.Reader, dims int) (answer int, err error) {
-	grid := make(map[[4]int]bool)
+	if dims > maxDimensions {
+		return 0, fmt.Errorf("called with too high a number of dimensions")
+	}
+	grid := make(map[[maxDimensions]int]bool)
 	i := 0
 	if err := input.ForEachLine(r, func(line string) error {
 		for j, s := range line {
 			if s == '#' {
-				grid[[4]int{i, j, 0, 0}] = true
+				grid[[maxDimensions]int{i, j, 0, 0}] = true
 			}
 		}
 		i++
@@ -467,13 +474,13 @@ func day17(r io.Reader, dims int) (answer int, err error) {
 		return 0, err
 	}
 	for step := 0; step < 6; step++ {
-		changes := make(map[[4]int]bool)
-		checked := make(map[[4]int]bool)
+		changes := make(map[[maxDimensions]int]bool)
+		checked := make(map[[maxDimensions]int]bool)
 		for x := range grid {
 			if n := activeNeighbors(grid, dims, x); n != 2 && n != 3 {
 				changes[x] = false
 			}
-			forEachNeighbor(grid, dims, x, func(y [4]int) {
+			forEachNeighbor(dims, x, func(y [maxDimensions]int) {
 				if grid[y] {
 					return
 				}
@@ -497,9 +504,9 @@ func day17(r io.Reader, dims int) (answer int, err error) {
 	return len(grid), nil
 }
 
-func activeNeighbors(grid map[[4]int]bool, dims int, x [4]int) int {
+func activeNeighbors(grid map[[maxDimensions]int]bool, dims int, x [maxDimensions]int) int {
 	active := 0
-	forEachNeighbor(grid, dims, x, func(y [4]int) {
+	forEachNeighbor(dims, x, func(y [maxDimensions]int) {
 		if grid[y] {
 			active++
 		}
@@ -507,24 +514,26 @@ func activeNeighbors(grid map[[4]int]bool, dims int, x [4]int) int {
 	return active
 }
 
-func forEachNeighbor(grid map[[4]int]bool, dims int, x [4]int, f func(y [4]int)) {
-	for i := -1; i <= 1; i++ {
-		for j := -1; j <= 1; j++ {
-			for k := -1; k <= 1; k++ {
-				if dims == 4 {
-					for l := -1; l <= 1; l++ {
-						if i == 0 && j == 0 && k == 0 && l == 0 {
-							continue
-						}
-						f([4]int{x[0] + i, x[1] + j, x[2] + k, x[3] + l})
-					}
-				} else {
-					if i == 0 && j == 0 && k == 0 {
-						continue
-					}
-					f([4]int{x[0] + i, x[1] + j, x[2] + k, 0})
-				}
-			}
+func forEachNeighbor(dims int, x [maxDimensions]int, f func(y [maxDimensions]int)) {
+	buf := make([]int, dims)
+	vals := []int{-1, 0, 1}
+	combo.All(buf, vals, func(diffs []int) {
+		if allZero(diffs) {
+			return
+		}
+		y := x
+		for i, d := range diffs {
+			y[i] += d
+		}
+		f(y)
+	})
+}
+
+func allZero(x []int) bool {
+	for _, v := range x {
+		if v != 0 {
+			return false
 		}
 	}
+	return true
 }

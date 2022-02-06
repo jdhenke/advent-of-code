@@ -122,8 +122,8 @@ func evalPart1(e *Expression) int {
 		return *e.Value
 	}
 	current := evalPart1(e.Expressions[0])
-	for i := 0; i < len(e.Operators); i++ {
-		if e.Operators[i] == "+" {
+	for i := 0; i < len(e.Operations); i++ {
+		if e.Operations[i] == "+" {
 			current += evalPart1(e.Expressions[i+1])
 		} else {
 			current *= evalPart1(e.Expressions[i+1])
@@ -141,11 +141,11 @@ func evalPart2(e *Expression) int {
 		e.Expressions[i] = &Expression{Value: &sum}
 		copy(e.Expressions[i+1:], e.Expressions[i+2:])
 		e.Expressions = e.Expressions[:len(e.Expressions)-1]
-		copy(e.Operators[i:], e.Operators[i+1:])
-		e.Operators = e.Operators[:len(e.Operators)-1]
+		copy(e.Operations[i:], e.Operations[i+1:])
+		e.Operations = e.Operations[:len(e.Operations)-1]
 	}
-	for i := 0; i < len(e.Operators); i++ {
-		if e.Operators[i] == "+" {
+	for i := 0; i < len(e.Operations); i++ {
+		if e.Operations[i] == "+" {
 			add(i)
 			i--
 		}
@@ -160,7 +160,7 @@ func evalPart2(e *Expression) int {
 type Expression struct {
 	Value       *int
 	Expressions []*Expression
-	Operators   []string
+	Operations  []string
 }
 
 func Parse(line string) (*Expression, error) {
@@ -169,9 +169,23 @@ func Parse(line string) (*Expression, error) {
 	return parse(scan, false)
 }
 
-// lexer acts as an untyped lexer, each token should be a paren, a value, or an operator.
+// scan acts as an untyped lexer, each token should be a paren, a value, or an operator
 func parse(scan *bufio.Scanner, inParens bool) (*Expression, error) {
 	current := &Expression{}
+	addExpr := func(sub *Expression) error {
+		if len(current.Expressions) != len(current.Operations) {
+			return fmt.Errorf("unexpected expression: %v", sub)
+		}
+		current.Expressions = append(current.Expressions, sub)
+		return nil
+	}
+	addOp := func(t string) error {
+		if len(current.Expressions) != len(current.Operations)+1 {
+			return fmt.Errorf("unexpected operation: %v", t)
+		}
+		current.Operations = append(current.Operations, t)
+		return nil
+	}
 	for scan.Scan() {
 		switch t := scan.Text(); t {
 		case "(":
@@ -179,31 +193,28 @@ func parse(scan *bufio.Scanner, inParens bool) (*Expression, error) {
 			if err != nil {
 				return nil, err
 			}
-			if len(current.Expressions) != len(current.Operators) {
-				return nil, fmt.Errorf("unexpected expression: %v", sub)
+			if err := addExpr(sub); err != nil {
+				return nil, err
 			}
-			current.Expressions = append(current.Expressions, sub)
 		case ")":
 			if !inParens {
 				return nil, fmt.Errorf("unexpected closing paren")
 			}
 			return current, nil
 		case "+", "*":
-			if len(current.Expressions) != len(current.Operators)+1 {
-				return nil, fmt.Errorf("unexpected operator: %v", t)
+			if err := addOp(t); err != nil {
+				return nil, err
 			}
-			current.Operators = append(current.Operators, t)
 		default: // value
-			if len(current.Expressions) != len(current.Operators) {
-				return nil, fmt.Errorf("unexpected value: %v", t)
-			}
 			d, err := strconv.Atoi(t)
 			if err != nil {
 				return nil, err
 			}
-			current.Expressions = append(current.Expressions, &Expression{
+			if err := addExpr(&Expression{
 				Value: &d,
-			})
+			}); err != nil {
+				return nil, err
+			}
 		}
 	}
 	if err := scan.Err(); err != nil {
@@ -212,7 +223,7 @@ func parse(scan *bufio.Scanner, inParens bool) (*Expression, error) {
 	if inParens {
 		return nil, fmt.Errorf("detected unclosed paren")
 	}
-	if len(current.Expressions) != len(current.Operators)+1 {
+	if len(current.Expressions) != len(current.Operations)+1 {
 		return nil, fmt.Errorf("unfinished expression")
 	}
 	return current, nil
@@ -234,8 +245,12 @@ var digits = map[byte]bool{
 }
 
 func splitFunc(data []byte, atEOF bool) (advance int, token []byte, err error) {
-	// because: https://stackoverflow.com/a/19941087, it seems the best thing to do is always keep data[0] the start of
-	// a new token, so always take up any trailing whitespace.
+	if len(data) == 0 {
+		return 0, nil, nil // need more data
+	}
+	// Because https://stackoverflow.com/a/19941087, it seems the best thing to do is always keep data[0] the start of
+	// a new token, so always take up any trailing whitespace. This assumes the input only ever has 1 character of
+	// whitespace.
 	defer func() {
 		if err != nil {
 			return
@@ -244,9 +259,6 @@ func splitFunc(data []byte, atEOF bool) (advance int, token []byte, err error) {
 			advance++
 		}
 	}()
-	if len(data) == 0 {
-		return 0, nil, nil
-	}
 	switch c := data[0]; c {
 	case '(', ')', '+', '*':
 		return 1, data[0:1], nil
@@ -255,7 +267,7 @@ func splitFunc(data []byte, atEOF bool) (advance int, token []byte, err error) {
 		for ; i < len(data) && digits[data[i]]; i++ {
 		}
 		if i == len(data) && !atEOF {
-			return 0, nil, nil
+			return 0, nil, nil // need more data, the value may extend beyond the cutoff
 		}
 		return i, data[:i], nil
 	default:

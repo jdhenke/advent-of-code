@@ -326,3 +326,28 @@ func oneOrMoreRule(r Rule) Rule {
 		r.Match(s, helper)
 	})
 }
+
+func equalPartsRule(r1, r2 Rule) Rule {
+	return ruleFunc(func(s string, f func(remaining string) bool) {
+		var r1s, r2s []Rule
+		for times := 1; ; times++ {
+			r1s = append(r1s, r1)
+			r2s = append(r2s, r2)
+			stop := true
+			seqRule(r1s).Match(s, func(afterR1s string) (ok bool) {
+				stop = false
+				seqRule(r2s).Match(afterR1s, func(afterR2s string) (ok bool) {
+					if !f(afterR2s) {
+						stop = true
+						return false
+					}
+					return true
+				})
+				return stop
+			})
+			if stop {
+				break
+			}
+		}
+	})
+}

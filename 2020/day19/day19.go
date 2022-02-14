@@ -94,7 +94,9 @@ end.)
 How many messages completely match rule 0?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day19(r)
+	return day19(r, func(rules map[int]Rule) {
+		// do not adjust original rules
+	})
 }
 
 /*
@@ -192,20 +194,27 @@ However, after updating rules 8 and 11, a total of 12 messages match:
 After updating rules 8 and 11, how many messages completely match rule 0?
 */
 func Part2(r io.Reader) (answer int, err error) {
-	return day19(r)
+	return day19(r, func(rules map[int]Rule) {
+		// 8: 42 | 42 8
+		rules[8] = oneOrMoreRule(rules[42])
+		// 11: 42 31 | 42 11 31
+		rules[11] = equalPartsRule(rules[42], rules[31])
+	})
 }
 
 type Rule interface {
 	// Match calls f with the remaining suffix of s for every possible matching prefix of s that matches this rule,
-	// stopping if f return false or there are no more matches.
-	Match(s string, f func(remaining string) (ok bool))
+	// stopping if f returns false or there are no more matches. If there is no match, f is never called. If there are
+	// multiple matches, f may be called multiple times.
+	Match(s string, f func(remaining string) (stop bool))
 }
 
-func day19(r io.Reader) (answer int, err error) {
+func day19(r io.Reader, update func(rules map[int]Rule)) (answer int, err error) {
 	inRules := true
 	rules := make(map[int]Rule)
 	if err := input.ForEachLine(r, func(line string) error {
 		if line == "" {
+			update(rules)
 			inRules = false
 			return nil
 		}
@@ -217,12 +226,12 @@ func day19(r io.Reader) (answer int, err error) {
 			rules[num] = rule
 			return nil
 		}
-		rules[0].Match(line, func(remaining string) (ok bool) {
+		rules[0].Match(line, func(remaining string) (stop bool) {
 			if remaining == "" {
 				answer++
-				return false
+				return true
 			}
-			return true
+			return false
 		})
 		return nil
 	}); err != nil {
@@ -255,14 +264,14 @@ func parseRule(rules map[int]Rule, line string) (int, Rule, error) {
 	return num, orRule(orRules), nil
 }
 
-type ruleFunc func(s string, f func(remaining string) bool)
+type ruleFunc func(s string, f func(remaining string) (stop bool))
 
-func (r ruleFunc) Match(s string, f func(remaining string) bool) {
+func (r ruleFunc) Match(s string, f func(remaining string) (stop bool)) {
 	r(s, f)
 }
 
 func literalRule(l string) Rule {
-	return ruleFunc(func(s string, f func(remaining string) bool) {
+	return ruleFunc(func(s string, f func(remaining string) (stop bool)) {
 		if strings.HasPrefix(s, l) {
 			f(s[len(l):])
 		}
@@ -277,30 +286,38 @@ func referenceRule(rules map[int]Rule, n int) Rule {
 
 func seqRule(rules []Rule) Rule {
 	return ruleFunc(func(s string, f func(remaining string) bool) {
-		var helper func(remaining string) bool
-		r := 0
-		helper = func(remaining string) bool {
-			r++
-			if r >= len(rules) {
+		// Should be when after all rules [0,i) have been called leaving the remaining string to try to be matched
+		// against the ^ith rule. Declared then assigned to allow a recursive call, which is not possible otherwise.
+		var helper func(i int, remaining string) bool
+		helper = func(i int, remaining string) bool {
+			// We've matched all rules, finally call f with the remainder after this sequence and propagate the return
+			// value.
+			if i >= len(rules) {
 				return f(remaining)
 			}
-			rules[r].Match(remaining, helper)
-			return true
+			// Otherwise, try to match the current rule calling this helper with the remaining string after this rule
+			// is applied and instructed to apply the next rule, stopping if any subsequent matches indicate to do so,
+			// otherwise, continue trying to match.
+			stop := false
+			rules[i].Match(remaining, func(nextRemaining string) bool {
+				stop = helper(i+1, nextRemaining)
+				return stop
+			})
+			return stop
 		}
-		rules[0].Match(s, helper)
+		rules[0].Match(s, func(remaining string) (stop bool) {
+			return helper(1, remaining)
+		})
 	})
 }
 
 func orRule(rules []Rule) Rule {
-	return ruleFunc(func(s string, f func(remaining string) bool) {
+	return ruleFunc(func(s string, f func(remaining string) (stop bool)) {
 		for _, rule := range rules {
 			stop := false
-			rule.Match(s, func(remaining string) (ok bool) {
-				ok = f(remaining)
-				if !ok {
-					stop = true
-				}
-				return ok
+			rule.Match(s, func(remaining string) bool {
+				stop = f(remaining)
+				return stop
 			})
 			if stop {
 				break
@@ -310,15 +327,17 @@ func orRule(rules []Rule) Rule {
 }
 
 func oneOrMoreRule(r Rule) Rule {
-	return ruleFunc(func(s string, f func(remaining string) bool) {
-		var helper func(remaining string) (ok bool)
-		helper = func(remaining string) (ok bool) {
-			if !f(remaining) {
-				return false
+	return ruleFunc(func(s string, f func(remaining string) (stop bool)) {
+		// Allow a recursive helper which is called after every successive match of r until it stops matching. At each
+		// match, try calling f to see if the current number of matches indicates that the matching should stop,
+		// otherwise continue trying.
+		var helper func(remaining string) (stop bool)
+		helper = func(remaining string) (stop bool) {
+			if f(remaining) {
+				return true
 			}
-			var stop bool
-			r.Match(remaining, func(remaining string) (ok bool) {
-				stop = helper(remaining)
+			r.Match(remaining, func(nextRemaining string) (ok bool) {
+				stop = helper(nextRemaining)
 				return stop
 			})
 			return stop
@@ -327,27 +346,29 @@ func oneOrMoreRule(r Rule) Rule {
 	})
 }
 
+// Matches any number of matches of r1 followed by the same number of matches by r2.
 func equalPartsRule(r1, r2 Rule) Rule {
-	return ruleFunc(func(s string, f func(remaining string) bool) {
+	return ruleFunc(func(s string, f func(remaining string) (stop bool)) {
+		// Try until the prefix of r1s does not match or f indicates to stop. This is because with a rule like
+		// equalParts(literalRule('a'), literalRule('b')), "aabb" wouldn't match 1 of each, but it would match 2, but
+		// once 3 is tried, it won't match and will never match again, so it is safe to stop trying only after the r1s
+		// fail to match.
 		var r1s, r2s []Rule
-		for times := 1; ; times++ {
+		for tryMoreNums := true; tryMoreNums; {
 			r1s = append(r1s, r1)
 			r2s = append(r2s, r2)
-			stop := true
-			seqRule(r1s).Match(s, func(afterR1s string) (ok bool) {
-				stop = false
-				seqRule(r2s).Match(afterR1s, func(afterR2s string) (ok bool) {
-					if !f(afterR2s) {
-						stop = true
-						return false
+			tryMoreNums = false // if r1s never matches, stop trying
+			seqRule(r1s).Match(s, func(afterR1s string) (stop bool) {
+				tryMoreNums = true // if r1s have matched but r2s have not, keep trying, unless a match says stop
+				seqRule(r2s).Match(afterR1s, func(afterR2s string) bool {
+					stop = f(afterR2s)
+					if stop {
+						tryMoreNums = false
 					}
-					return true
+					return stop
 				})
 				return stop
 			})
-			if stop {
-				break
-			}
 		}
 	})
 }

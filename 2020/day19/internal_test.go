@@ -17,50 +17,50 @@ func TestOneOrMore(t *testing.T) {
 	}))
 	for _, tc := range []struct {
 		s    string
-		ok   bool
+		stop bool
 		want []string
 	}{
 		{
 			s:    "",
-			ok:   true,
+			stop: false,
 			want: []string(nil),
 		},
 		{
 			s:    "a",
-			ok:   true,
+			stop: false,
 			want: []string(nil),
 		},
 		{
 			s:    "ab",
-			ok:   true,
+			stop: false,
 			want: []string{""},
 		},
 		{
 			s:    "abc",
-			ok:   true,
+			stop: false,
 			want: []string{"c"},
 		},
 		{
 			s:    "abac",
-			ok:   true,
+			stop: false,
 			want: []string{"ac", ""},
 		},
 		{
 			s:    "abac",
-			ok:   false,
+			stop: true,
 			want: []string{"ac"},
 		},
 		{
 			s:    "abacd",
-			ok:   true,
+			stop: false,
 			want: []string{"acd", "d"},
 		},
 	} {
-		t.Run(fmt.Sprintf("%s:%v", tc.s, tc.ok), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%s:%v", tc.s, tc.stop), func(t *testing.T) {
 			var got []string
 			r.Match(tc.s, func(remaining string) (ok bool) {
 				got = append(got, remaining)
-				return tc.ok
+				return tc.stop
 			})
 			assert.Equal(t, tc.want, got)
 		})
@@ -71,40 +71,40 @@ func TestEqualPartsRule(t *testing.T) {
 	r := equalPartsRule(literalRule("a"), literalRule("b"))
 	for _, tc := range []struct {
 		s    string
-		ok   bool
+		stop bool
 		want []string
 	}{
 		{
 			s:    "",
-			ok:   true,
+			stop: false,
 			want: []string(nil),
 		},
 		{
 			s:    "a",
-			ok:   true,
+			stop: false,
 			want: []string(nil),
 		},
 		{
 			s:    "ab",
-			ok:   true,
+			stop: false,
 			want: []string{""},
 		},
 		{
 			s:    "abb",
-			ok:   true,
+			stop: false,
 			want: []string{"b"},
 		},
 		{
 			s:    "abba",
-			ok:   true,
+			stop: false,
 			want: []string{"ba"},
 		},
 	} {
-		t.Run(fmt.Sprintf("%s:%v", tc.s, tc.ok), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%s:%v", tc.s, tc.stop), func(t *testing.T) {
 			var got []string
 			r.Match(tc.s, func(remaining string) (ok bool) {
 				got = append(got, remaining)
-				return tc.ok
+				return tc.stop
 			})
 			assert.Equal(t, tc.want, got)
 		})
@@ -115,35 +115,35 @@ func TestEqualPartsMultipleMatches(t *testing.T) {
 	r := equalPartsRule(literalRule("a"), literalRule("a"))
 	for _, tc := range []struct {
 		s    string
-		ok   bool
+		stop bool
 		want []string
 	}{
 		{
 			s:    "aa",
-			ok:   true,
+			stop: false,
 			want: []string{""},
 		},
 		{
 			s:    "aaaa",
-			ok:   true,
+			stop: false,
 			want: []string{"aa", ""},
 		},
 		{
 			s:    "aaaaaa",
-			ok:   true,
+			stop: false,
 			want: []string{"aaaa", "aa", ""},
 		},
 		{
 			s:    "aaaaaa",
-			ok:   false,
+			stop: true,
 			want: []string{"aaaa"},
 		},
 	} {
-		t.Run(fmt.Sprintf("%s:%v", tc.s, tc.ok), func(t *testing.T) {
+		t.Run(fmt.Sprintf("%s:%v", tc.s, tc.stop), func(t *testing.T) {
 			var got []string
 			r.Match(tc.s, func(remaining string) (ok bool) {
 				got = append(got, remaining)
-				return tc.ok
+				return tc.stop
 			})
 			assert.Equal(t, tc.want, got)
 		})

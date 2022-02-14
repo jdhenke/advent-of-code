@@ -308,3 +308,21 @@ func orRule(rules []Rule) Rule {
 		}
 	})
 }
+
+func oneOrMoreRule(r Rule) Rule {
+	return ruleFunc(func(s string, f func(remaining string) bool) {
+		var helper func(remaining string) (ok bool)
+		helper = func(remaining string) (ok bool) {
+			if !f(remaining) {
+				return false
+			}
+			var stop bool
+			r.Match(remaining, func(remaining string) (ok bool) {
+				stop = helper(remaining)
+				return stop
+			})
+			return stop
+		}
+		r.Match(s, helper)
+	})
+}

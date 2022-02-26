@@ -213,23 +213,143 @@ func Part1(r io.Reader) (answer int, err error) {
 	return answer, nil
 }
 
-const part2Signature = ``
+const part2Signature = `                  # 
+#    ##    ##    ###
+ #  #  #  #  #  #   `
 
+/*
+Part2 Prompt
+
+--- Part Two ---
+Now, you're ready to check the image for sea monsters.
+
+The borders of each tile are not part of the actual image; start by removing
+them.
+
+In the example above, the tiles become:
+
+    .#.#..#. ##...#.# #..#####
+    ###....# .#....#. .#......
+    ##.##.## #.#.#..# #####...
+    ###.#### #...#.## ###.#..#
+    ##.#.... #.##.### #...#.##
+    ...##### ###.#... .#####.#
+    ....#..# ...##..# .#.###..
+    .####... #..#.... .#......
+
+    #..#.##. .#..###. #.##....
+    #.####.. #.####.# .#.###..
+    ###.#.#. ..#.#### ##.#..##
+    #.####.. ..##..## ######.#
+    ##..##.# ...#...# .#.#.#..
+    ...#..#. .#.#.##. .###.###
+    .#.#.... #.##.#.. .###.##.
+    ###.#... #..#.##. ######..
+
+    .#.#.### .##.##.# ..#.##..
+    .####.## #.#...## #.#..#.#
+    ..#.#..# ..#.#.#. ####.###
+    #..####. ..#.#.#. ###.###.
+    #####..# ####...# ##....##
+    #.##..#. .#...#.. ####...#
+    .#.###.. ##..##.. ####.##.
+    ...###.. .##...#. ..#..###
+
+Remove the gaps to form the actual image:
+
+    .#.#..#.##...#.##..#####
+    ###....#.#....#..#......
+    ##.##.###.#.#..######...
+    ###.#####...#.#####.#..#
+    ##.#....#.##.####...#.##
+    ...########.#....#####.#
+    ....#..#...##..#.#.###..
+    .####...#..#.....#......
+    #..#.##..#..###.#.##....
+    #.####..#.####.#.#.###..
+    ###.#.#...#.######.#..##
+    #.####....##..########.#
+    ##..##.#...#...#.#.#.#..
+    ...#..#..#.#.##..###.###
+    .#.#....#.##.#...###.##.
+    ###.#...#..#.##.######..
+    .#.#.###.##.##.#..#.##..
+    .####.###.#...###.#..#.#
+    ..#.#..#..#.#.#.####.###
+    #..####...#.#.#.###.###.
+    #####..#####...###....##
+    #.##..#..#...#..####...#
+    .#.###..##..##..####.##.
+    ...###...##...#...#..###
+
+Now, you're ready to search for sea monsters! Because your image is monochrome,
+a sea monster will look like this:
+
+                      #
+    #    ##    ##    ###
+     #  #  #  #  #  #
+
+When looking for this pattern in the image, the spaces can be anything; only
+the # need to match. Also, you might need to rotate or flip your image before
+it's oriented correctly to find sea monsters. In the above image, after
+flipping and rotating it to the appropriate orientation, there are two sea
+monsters (marked with O):
+
+    .####...#####..#...###..
+    #####..#..#.#.####..#.#.
+    .#.#...#.###...#.##.O#..
+    #.O.##.OO#.#.OO.##.OOO##
+    ..#O.#O#.O##O..O.#O##.##
+    ...#.#..##.##...#..#..##
+    #.##.#..#.#..#..##.#.#..
+    .###.##.....#...###.#...
+    #.####.#.#....##.#..#.#.
+    ##...#..#....#..#...####
+    ..#.##...###..#.#####..#
+    ....#.##.#.#####....#...
+    ..##.##.###.....#.##..#.
+    #...#...###..####....##.
+    .#.##...#.##.#.#.###...#
+    #.###.#..####...##..#...
+    #.###...#.##...#.##O###.
+    .O##.#OO.###OO##..OOO##.
+    ..O#.O..O..O.#O##O##.###
+    #.#..##.########..#..##.
+    #.#####..#.#...##..#....
+    #....##..#.#########..##
+    #...#.....#..##...###.##
+    #..###....##.#...##.##.#
+
+Determine how rough the waters are in the sea monsters' habitat by counting the
+number of # that are not part of a sea monster. In the above example, the
+habitat's water roughness is 273.
+
+How many # are not part of a sea monster?
+*/
 func Part2(r io.Reader) (answer int, err error) {
 	grid, err := solve(r)
 	if err != nil {
 		return 0, err
 	}
 	t := Tile{
-		Data: strings.Split(strings.TrimSpace(part2Signature), "\n"),
+		Data: strings.Split(part2Signature, "\n"),
 	}
+	// trims the borders which are not part of the pictures
+	grid.trim()
+	numMatches := 0
 	t.ForAllOrientations(func(t Tile) {
 		grid.ForAllLocations(func(i, j int) {
 			if grid.MatchesSignature(i, j, t.Data) {
-				answer++
+				numMatches++
 			}
 		})
 	})
+	grid.ForAllLocations(func(i int, j int) {
+		if grid.at(i, j) == '#' {
+			answer++
+		}
+	})
+	answer -= numMatches * strings.Count(part2Signature, "#")
 	return answer, nil
 }
 
@@ -250,7 +370,7 @@ func (g Grid) ForAllLocations(f func(i int, j int)) {
 func (g Grid) MatchesSignature(i int, j int, sig []string) bool {
 	for si := 0; si < len(sig); si++ {
 		for sj := 0; sj < len(sig[0]); sj++ {
-			if sig[i][j] != '#' {
+			if sig[si][sj] != '#' {
 				continue
 			}
 			if g.at(i+si, j+sj) != '#' {
@@ -266,10 +386,22 @@ func (g Grid) at(i int, j int) byte {
 	ti := i / m
 	n := len(g[0][0].Data[0])
 	tj := j / n
-	if ti >= len(g) || tj > len(g[0]) {
+	if ti >= len(g) || tj >= len(g[0]) {
 		return '\x00'
 	}
 	return g[ti][tj].Data[i%m][j%n]
+}
+
+func (g Grid) trim() {
+	for gi := range g {
+		for gj := range g[gi] {
+			var newData []string
+			for i := 1; i < len(g[gi][gj].Data)-1; i++ {
+				newData = append(newData, g[gi][gj].Data[i][1:len(g[gi][gj].Data)-1])
+			}
+			g[gi][gj].Data = newData
+		}
+	}
 }
 
 type Tile struct {

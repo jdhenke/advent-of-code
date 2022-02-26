@@ -331,11 +331,23 @@ func Part2(r io.Reader) (answer int, err error) {
 	if err != nil {
 		return 0, err
 	}
+
+	// Create a tile of the signature so Tile.ForAllOrientations can be reused to check all orientations of the
+	// signature. This also avoids having to merge the existing tiles.
 	t := Tile{
 		Data: strings.Split(part2Signature, "\n"),
 	}
-	// trims the borders which are not part of the pictures
+
+	// Removes the borders which are not part of the image.
 	grid.trim()
+
+	// Assuming no overlapping signatures, calculate the number of '#' not in a signature by counting all '#' then
+	// subtracting the number of signatures times the number of '#' in each signature.
+	grid.ForAllLocations(func(i int, j int) {
+		if grid.at(i, j) == '#' {
+			answer++
+		}
+	})
 	numMatches := 0
 	t.ForAllOrientations(func(t Tile) {
 		grid.ForAllLocations(func(i, j int) {
@@ -344,13 +356,98 @@ func Part2(r io.Reader) (answer int, err error) {
 			}
 		})
 	})
-	grid.ForAllLocations(func(i int, j int) {
-		if grid.at(i, j) == '#' {
-			answer++
-		}
-	})
 	answer -= numMatches * strings.Count(part2Signature, "#")
 	return answer, nil
+}
+
+func solve(r io.Reader) (grid Grid, err error) {
+	// parse tiles
+	var tiles []Tile
+	if err := input.ForEachBatch(r, func(batch []string) error {
+		id, err := parseTileNum(batch[0])
+		if err != nil {
+			return err
+		}
+		tiles = append(tiles, Tile{
+			ID:   id,
+			Data: batch[1:],
+		})
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	// Create index of BorderAndSide to all orientations of all tiles. Note that this means every entry will end up
+	// with at least one entry, the flipped version of the same tile.
+	m := make(map[BorderAndSide][]Tile)
+	for _, t := range tiles {
+		t.ForAllOrientations(func(t Tile) {
+			t.ForAllBorders(func(bs BorderAndSide) {
+				m[bs] = append(m[bs], t)
+			})
+		})
+	}
+
+	// Identify an arbitrary, but deterministic, top left tile.
+	var corners []Tile
+	for bs, ts := range m {
+		// If the tile corresponding to this top border only matches the flipped version of itself to the left, this is
+		// a corner tile.
+		if bs.Side == SideTop && len(ts) == 1 && len(m[ts[0].Match(SideLeft)]) == 1 {
+			corners = append(corners, ts[0])
+		}
+	}
+	// All four corner tiles in the original or flipped version could be top left in one of their rotations, so verify
+	// all of these have in fact been found.
+	if len(corners) != 8 {
+		return nil, fmt.Errorf("could not identify corners: %d", len(corners))
+	}
+	sort.Slice(corners, func(i, j int) bool {
+		if corners[i].ID != corners[j].ID {
+			return corners[i].ID < corners[j].ID
+		}
+		return corners[i].Data[0] < corners[j].Data[0]
+	})
+	topLeft := corners[0]
+
+	// Assemble the grid row by row, finding tiles that match to the right that have not been used yet, avoiding
+	// including flipped or rotated versions of a tile that has already been used.
+	seen := make(map[int]bool)
+	grid = append(grid, []Tile{topLeft})
+	seen[topLeft.ID] = true
+	current := topLeft
+	getUnseenMatch := func(bs BorderAndSide) (Tile, bool) {
+		for _, match := range m[bs] {
+			if seen[match.ID] {
+				continue
+			}
+			seen[match.ID] = true
+			return match, true
+		}
+		return Tile{}, false
+	}
+	for {
+		var ok bool
+		for current, ok = getUnseenMatch(current.Match(SideRight)); ok; current, ok = getUnseenMatch(current.Match(SideRight)) {
+			grid[len(grid)-1] = append(grid[len(grid)-1], current)
+		}
+		current, ok = getUnseenMatch(grid[len(grid)-1][0].Match(SideBottom))
+		if !ok {
+			break
+		}
+		grid = append(grid, []Tile{current})
+	}
+	return grid, nil
+}
+
+var re = regexp.MustCompile(`Tile (\d+):`)
+
+func parseTileNum(s string) (int, error) {
+	match := re.FindStringSubmatch(s)
+	if match == nil {
+		return 0, fmt.Errorf("bad tile header: %v", s)
+	}
+	return strconv.Atoi(match[1])
 }
 
 type Grid [][]Tile
@@ -381,6 +478,7 @@ func (g Grid) MatchesSignature(i int, j int, sig []string) bool {
 	return true
 }
 
+// assumes all tiles are the same size, returns a null byte if out of bounds of the grid.
 func (g Grid) at(i int, j int) byte {
 	m := len(g[0][0].Data)
 	ti := i / m
@@ -409,6 +507,15 @@ type Tile struct {
 	Data []string
 }
 
+// Match returns a BorderAndSide that would match this Tile's given Side.
+//
+// For example, calling Match(SideRight) for this Tile:
+//
+//     A B C
+//     D E F
+//     G H I
+//
+// Would return SideLeft for "CFI".
 func (t Tile) Match(side Side) BorderAndSide {
 	matchingSide := map[Side]Side{
 		SideTop:    SideBottom,
@@ -450,6 +557,7 @@ func (t Tile) col(j int) string {
 	return buf.String()
 }
 
+// ForAllOrientations calls f for each of the eight different flipped and rotated versions of t.
 func (t Tile) ForAllOrientations(f func(t Tile)) {
 	for _, temp := range []Tile{t, t.flip()} {
 		for i := 0; i < 4; i++ {
@@ -526,90 +634,4 @@ const (
 type BorderAndSide struct {
 	Side   Side
 	Border string
-}
-
-func solve(r io.Reader) (grid Grid, err error) {
-	// parse tiles
-	var tiles []Tile
-	if err := input.ForEachBatch(r, func(batch []string) error {
-		id, err := parseTileNum(batch[0])
-		if err != nil {
-			return err
-		}
-		tiles = append(tiles, Tile{
-			ID:   id,
-			Data: batch[1:],
-		})
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	// create index of BorderAndSides to tiles that match that
-	m := make(mapping)
-	for _, t := range tiles {
-		t.ForAllOrientations(func(t Tile) {
-			t.ForAllBorders(func(bs BorderAndSide) {
-				m[bs] = append(m[bs], t)
-			})
-		})
-	}
-
-	var corners []Tile
-	for bs, ts := range m {
-		// If the only matching tile to its left would be itself (which will always exist)
-		if bs.Side == SideTop && len(ts) == 1 && len(m[ts[0].Match(SideLeft)]) == 1 {
-			corners = append(corners, ts[0])
-		}
-	}
-	// all four corner tiles in original or flipped could be top left ==> 8 possible tiles
-	if len(corners) != 8 {
-		return nil, fmt.Errorf("could not identify corners: %d", len(corners))
-	}
-	sort.Slice(corners, func(i, j int) bool {
-		if corners[i].ID != corners[j].ID {
-			return corners[i].ID < corners[j].ID
-		}
-		return corners[i].Data[0] < corners[j].Data[0]
-	})
-	topLeft := corners[0]
-
-	seen := make(map[int]bool)
-	grid = append(grid, []Tile{topLeft})
-	seen[topLeft.ID] = true
-	current := topLeft
-	getUnseenMatch := func(bs BorderAndSide) (Tile, bool) {
-		for _, match := range m[bs] {
-			if seen[match.ID] {
-				continue
-			}
-			seen[match.ID] = true
-			return match, true
-		}
-		return Tile{}, false
-	}
-	for {
-		var ok bool
-		for current, ok = getUnseenMatch(current.Match(SideRight)); ok; current, ok = getUnseenMatch(current.Match(SideRight)) {
-			grid[len(grid)-1] = append(grid[len(grid)-1], current)
-		}
-		current, ok = getUnseenMatch(grid[len(grid)-1][0].Match(SideBottom))
-		if !ok {
-			break
-		}
-		grid = append(grid, []Tile{current})
-	}
-	return grid, nil
-}
-
-type mapping map[BorderAndSide][]Tile
-
-var re = regexp.MustCompile(`Tile (\d+):`)
-
-func parseTileNum(s string) (int, error) {
-	match := re.FindStringSubmatch(s)
-	if match == nil {
-		return 0, fmt.Errorf("bad tile header: %v", s)
-	}
-	return strconv.Atoi(match[1])
 }

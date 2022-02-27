@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/jdhenke/advent-of-code/input"
@@ -57,11 +58,58 @@ Determine which ingredients cannot possibly contain any of the allergens in
 your list. How many times do any of those ingredients appear?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day21(r)
+	counts, solution, err := day21(r)
+	for ing, count := range counts {
+		if _, ok := solution[ing]; !ok {
+			answer += count
+		}
+	}
+	return answer, nil
 }
 
+/*
+Part2 Prompt
+
+--- Part Two ---
+Now that you've isolated the inert ingredients, you should have enough
+information to figure out which ingredient contains which allergen.
+
+In the above example:
+
+- mxmxvkd contains dairy.
+- sqjhc contains fish.
+- fvjkl contains soy.
+
+Arrange the ingredients alphabetically by their allergen and separate them by
+commas to produce your canonical dangerous ingredient list. (There should not
+be any spaces in your canonical dangerous ingredient list.) In the above
+example, this would be mxmxvkd,sqjhc,fvjkl.
+
+Time to stock your raft with supplies. What is your canonical dangerous
+ingredient list?
+*/
 func Part2(r io.Reader) (answer int, err error) {
-	return day21(r)
+	_, solution, err := day21(r)
+	type pair struct {
+		ingredient
+		allergen
+	}
+	var pairs []pair
+	for ing, al := range solution {
+		pairs = append(pairs, pair{
+			ingredient: ing,
+			allergen:   al,
+		})
+	}
+	sort.Slice(pairs, func(i, j int) bool {
+		return pairs[i].allergen < pairs[j].allergen
+	})
+	var ings []string
+	for _, p := range pairs {
+		ings = append(ings, string(p.ingredient))
+	}
+	fmt.Println(strings.Join(ings, ","))
+	return 0, nil
 }
 
 type allergen string
@@ -84,9 +132,9 @@ func (m allergenOptions) markSolved(al allergen, ing ingredient) {
 	}
 }
 
-func day21(r io.Reader) (answer int, err error) {
+func day21(r io.Reader) (counts map[ingredient]int, solution map[ingredient]allergen, err error) {
 	options := make(allergenOptions)
-	counts := make(map[ingredient]int)
+	counts = make(map[ingredient]int)
 	if err := input.ForEachLine(r, func(line string) error {
 		ingredients, allergens := parse(line)
 		for _, ing := range ingredients {
@@ -104,9 +152,9 @@ func day21(r io.Reader) (answer int, err error) {
 		}
 		return nil
 	}); err != nil {
-		return 0, err
+		return nil, nil, err
 	}
-	solution := make(map[ingredient]allergen)
+	solution = make(map[ingredient]allergen)
 	for al, optsForAl := range options {
 		if len(optsForAl) == 1 {
 			solution[only(optsForAl)] = al
@@ -115,12 +163,7 @@ func day21(r io.Reader) (answer int, err error) {
 			panic("Unsolved")
 		}
 	}
-	for ing, count := range counts {
-		if _, ok := solution[ing]; !ok {
-			answer += count
-		}
-	}
-	return answer, nil
+	return counts, solution, nil
 }
 
 func set(ingredients []ingredient) map[ingredient]bool {

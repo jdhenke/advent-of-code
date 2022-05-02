@@ -1,10 +1,9 @@
 package day22
 
 import (
-	"encoding/json"
+	"fmt"
 	"io"
 	"regexp"
-	"sort"
 	"strconv"
 
 	"github.com/jdhenke/advent-of-code/input"
@@ -455,7 +454,7 @@ var re = regexp.MustCompile(`Player (\d+):`)
 
 func day22(r io.Reader, judge judgeFunc) (answer int, err error) {
 	// parse cards
-	hands := make(map[string][]int)
+	var h1, h2 []int
 	{
 		var player string
 		if err := input.ForEachLine(r, func(line string) error {
@@ -470,7 +469,11 @@ func day22(r io.Reader, judge judgeFunc) (answer int, err error) {
 			if err != nil {
 				return err
 			}
-			hands[player] = append(hands[player], x)
+			if player == "1" {
+				h1 = append(h1, x)
+			} else {
+				h2 = append(h2, x)
+			}
 			return nil
 		}); err != nil {
 			return 0, err
@@ -478,98 +481,63 @@ func day22(r io.Reader, judge judgeFunc) (answer int, err error) {
 	}
 
 	// play and return the score of the winning hand
-	_, score := play(hands, judge)
+	_, score := play(h1, h2, judge)
 	return score, nil
 }
 
-type judgeFunc func(round map[string]int, hands map[string][]int) (winner string)
+type judgeFunc func(c1, c2 int, h1, h2 []int) (winner string)
 
-func play(hands map[string][]int, judge judgeFunc) (winnerID string, winnerScore int) {
+func play(h1, h2 []int, judge judgeFunc) (winnerID string, winnerScore int) {
 	seen := make(map[string]struct{})
 	for {
 		// protect against infinite games
-		b, _ := json.Marshal(hands)
-		s := string(b)
+		s := fmt.Sprint(h1, h2)
 		if _, ok := seen[s]; ok {
-			return "1", calculateScore(hands["1"])
+			return "1", calculateScore(h1)
 		}
 		seen[s] = struct{}{}
 
 		// draw one card from each hand
-		round := make(map[string]int)
-		var cards []int
-		for player, hand := range hands {
-			if len(hand) == 0 {
-				continue
-			}
-			card := hand[0]
-			round[player] = card
-			cards = append(cards, card)
-			hands[player] = hand[1:]
+		c1, c2 := h1[0], h2[0]
+		h1, h2 = h1[1:], h2[1:]
+
+		// determine round winner
+		winner := judge(c1, c2, h1, h2)
+
+		// add cards to round winner's hand
+		if winner == "1" {
+			h1 = append(h1, c1, c2)
+		} else {
+			h2 = append(h2, c2, c1)
 		}
-		winner := judge(round, hands)
 
-		// ensure the winning card is on top and add to the winner's hand
-		sort.Slice(cards, func(i, j int) bool {
-			if cards[i] == round[winner] {
-				return true
-			}
-			return false
-		})
-		hands[winner] = append(hands[winner], cards...)
-
-		// check for a winner
-		if winningHand, over := isOver(hands); over {
-			return winner, calculateScore(winningHand)
+		// check for a game winner
+		if len(h1) == 0 {
+			return "2", calculateScore(h2)
+		} else if len(h2) == 0 {
+			return "1", calculateScore(h1)
 		}
 	}
 }
 
-func judgePart1(round map[string]int, hands map[string][]int) (winner string) {
-	var maxCard int
-	for player, card := range round {
-		if card > maxCard {
-			maxCard = card
-			winner = player
-		}
+// simply choose the larger card
+func judgePart1(c1, c2 int, h1, h2 []int) (winner string) {
+	if c1 > c2 {
+		return "1"
 	}
-	return winner
+	return "2"
 }
 
-func judgePart2(round map[string]int, hands map[string][]int) (winner string) {
-	recurse := true
-	for player, card := range round {
-		if len(hands[player]) < card {
-			recurse = false
-			break
-		}
-	}
-	if recurse {
-		handsCopy := make(map[string][]int)
-		for player, hand := range hands {
-			numCardsToUse := round[player] // dictated by the card drawn by the player this round
-			handCopy := make([]int, numCardsToUse)
-			copy(handCopy, hand[:numCardsToUse])
-			handsCopy[player] = handCopy
-		}
-		winner, _ = play(handsCopy, judgePart2)
+// recurse if possible, otherwise just choose the larger card
+func judgePart2(c1, c2 int, h1, h2 []int) (winner string) {
+	if len(h1) >= c1 && len(h2) >= c2 {
+		h1Copy, h2Copy := make([]int, c1), make([]int, c2)
+		copy(h1Copy, h1)
+		copy(h2Copy, h2)
+		winner, _ = play(h1Copy, h2Copy, judgePart2)
 		return winner
 	}
-	return judgePart1(round, hands)
-}
-
-func isOver(hands map[string][]int) (winningHand []int, over bool) {
-	numWithCards := 0
-	for _, cards := range hands {
-		if len(cards) > 0 {
-			numWithCards++
-			winningHand = cards
-		}
-	}
-	if numWithCards > 1 {
-		return nil, false
-	}
-	return winningHand, true
+	return judgePart1(c1, c2, h1, h2)
 }
 
 func calculateScore(hand []int) int {

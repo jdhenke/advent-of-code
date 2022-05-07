@@ -111,54 +111,113 @@ Using your labeling, simulate 100 moves. What are the labels on the cups after
 cup 1?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day23(r, 100)
+	return part1(r, 100)
 }
 
-func Part2(r io.Reader) (answer int, err error) {
-	return day23(r, 100)
-}
-
-func day23(r io.Reader, steps int) (answer int, err error) {
-	var labels []int
-	b, err := ioutil.ReadAll(r)
+func part1(r io.Reader, steps int) (int, error) {
+	one, err := day23(r, steps, 0)
 	if err != nil {
 		return 0, err
 	}
-	b = bytes.TrimSpace(b)
-	for i := 0; i < len(b); i++ {
-		x, err := strconv.Atoi(string(b[i : i+1]))
-		if err != nil {
-			return 0, err
-		}
-		labels = append(labels, x)
-	}
-
-	// create circle
-	current := circle.New(labels...)
-
-	//. run through steps
-	for i := 0; i < steps; i++ {
-		destLabel := current.Value()
-		cups := current.Snip(3)
-		var dest *circle.Entry[int]
-		for dest == nil {
-			destLabel--
-			if destLabel < 1 {
-				destLabel = 9
-			}
-			dest = current.Find(destLabel)
-		}
-		dest.Insert(cups)
-		current = current.Next()
-	}
-
-	// assemble answer
-	one := current.Find(1)
 	ans := 0
 	for e := one.Next(); e.Value() != 1; e = e.Next() {
 		ans *= 10
 		ans += e.Value()
 	}
 	return ans, nil
+}
 
+/*
+Part2 Prompt
+
+--- Part Two ---
+Due to what you can only assume is a mistranslation (you're not exactly fluent
+in Crab), you are quite surprised when the crab starts arranging many cups in a
+circle on your raft - one million (1000000) in total.
+
+Your labeling is still correct for the first few cups; after that, the
+remaining cups are just numbered in an increasing fashion starting from the
+number after the highest number in your list and proceeding one by one until
+one million is reached. (For example, if your labeling were 54321, the cups
+would be numbered 5, 4, 3, 2, 1, and then start counting up from 6 until one
+million is reached.) In this way, every number from one through one million is
+used exactly once.
+
+After discovering where you made the mistake in translating Crab Numbers, you
+realize the small crab isn't going to do merely 100 moves; the crab is going to
+do ten million (10000000) moves!
+
+The crab is going to hide your stars - one each - under the two cups that will
+end up immediately clockwise of cup 1. You can have them if you predict what
+the labels on those cups will be when the crab is finished.
+
+In the above example (389125467), this would be 934001 and then 159792;
+multiplying these together produces 149245887792.
+
+Determine which two cups will end up immediately clockwise of cup 1. What do
+you get if you multiply their labels together?
+*/
+func Part2(r io.Reader) (answer int, err error) {
+	one, err := day23(r, 10_000_000, 1_000_000)
+	if err != nil {
+		return 0, err
+	}
+	a := one.Next()
+	b := a.Next()
+	return a.Value() * b.Value(), nil
+}
+
+func day23(r io.Reader, steps int, fillTo int) (one *circle.Entry[int], err error) {
+	// parse initial numbers
+	var labels []int
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	b = bytes.TrimSpace(b)
+	for i := 0; i < len(b); i++ {
+		x, err := strconv.Atoi(string(b[i : i+1]))
+		if err != nil {
+			return nil, err
+		}
+		labels = append(labels, x)
+	}
+
+	// fill remaining values
+	for i := len(labels) + 1; i <= fillTo; i++ {
+		labels = append(labels, i)
+	}
+
+	// create circle
+	current, lookup := circle.New(labels...)
+
+	// run through steps
+	for i := 0; i < steps; i++ {
+		// pickup the following three cups
+		cups, vals := current.Snip(3)
+
+		// find target destination label that isn't in the picked up cups
+		destLabel := current.Value()
+		dec := func() {
+			destLabel--
+			if destLabel <= 0 {
+				destLabel = len(labels)
+			}
+		}
+		for dec(); vals[destLabel]; dec() {
+		}
+
+		// find destination entry in constant time
+		dest := lookup[destLabel]
+
+		// move cups to after the destination entry
+		dest.Insert(cups)
+
+		// get the next current cup
+		current = current.Next()
+	}
+
+	// return the 1 entry in the circle so that each part may calculate their scores in their different ways
+	one = lookup[1]
+	return one, nil
 }

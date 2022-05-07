@@ -9,7 +9,7 @@ import (
 
 func TestPart1(t *testing.T) {
 	tester.New(t, func(r io.Reader) (ans int, err error) {
-		return day23(r, 10)
+		return part1(r, 10)
 	}).Run(
 		tester.FromString(`389125467`).Want(92658374),
 	)

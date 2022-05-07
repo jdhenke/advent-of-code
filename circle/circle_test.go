@@ -9,7 +9,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	e := circle.New(1, 2, 3)
+	e, _ := circle.New(1, 2, 3)
 	assert.Equal(t, 1, e.Value())
 	e = e.Next()
 	assert.Equal(t, 2, e.Value())
@@ -19,18 +19,18 @@ func TestNew(t *testing.T) {
 	assert.Equal(t, 1, e.Value())
 }
 
-func TestFind(t *testing.T) {
-	e := circle.New(1, 2, 3)
-	two := e.Find(2)
+func TestLookup(t *testing.T) {
+	_, lookup := circle.New(1, 2, 3)
+	two := lookup[2]
 	require.NotNil(t, two)
 	assert.Equal(t, 2, two.Value())
 	assert.Equal(t, 3, two.Next().Value())
-	assert.Nil(t, e.Find(4))
+	assert.Nil(t, lookup[4])
 }
 
 func TestSnipAndInsert(t *testing.T) {
-	e := circle.New(1, 2, 3)
-	s := e.Snip(1)
+	e, _ := circle.New(1, 2, 3)
+	s, _ := e.Snip(1)
 	assert.Equal(t, 1, e.Value(), 1)
 	assert.Equal(t, 3, e.Next().Value())
 	assert.Equal(t, 1, e.Next().Next().Value())

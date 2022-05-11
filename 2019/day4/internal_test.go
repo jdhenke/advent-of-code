@@ -7,17 +7,21 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMatches(t *testing.T) {
-	for _, tc := range []struct {
-		num  int
-		want bool
+func TestMatchesPart1(t *testing.T) {
+	for i, tc := range []struct {
+		matchesFunc func(digits []int) bool
+		num         int
+		want        bool
 	}{
-		{111111, true},
-		{223450, false},
-		{123789, false},
+		{matchesPart1, 111111, true},
+		{matchesPart1, 223450, false},
+		{matchesPart1, 123789, false},
+		{matchesPart2, 112233, true},
+		{matchesPart2, 123444, false},
+		{matchesPart2, 111122, true},
 	} {
-		t.Run(fmt.Sprint(tc.num), func(t *testing.T) {
-			got := matches(tc.num)
+		t.Run(fmt.Sprint(i), func(t *testing.T) {
+			got := tc.matchesFunc(toDigits(tc.num))
 			assert.Equal(t, tc.want, got)
 		})
 	}

@@ -494,12 +494,6 @@ func (b *block) SetLoc(x int, y int) {
 	b.x, b.y = x, y
 }
 
-func (b *block) TryMoveX(g *grid, dx int) {
-	if newX := b.x + dx; newX > 0 && newX+b.width <= 7 {
-		b.x = newX
-	}
-}
-
 func (b *block) CanMove(g *grid, dx, dy int) bool {
 	newX, newY := b.x+dx, b.y+dy
 	if newX < 0 || newX+b.width > 7 {

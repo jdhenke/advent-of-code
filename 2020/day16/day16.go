@@ -39,12 +39,12 @@ Each ticket is represented by a single line of comma-separated values. The
 values are the numbers on the ticket in the order they appear; every ticket has
 the same format. For example, consider this ticket:
 
-    .--------------------------------------------------------.
-    | ????: 101    ?????: 102   ??????????: 103     ???: 104 |
-    |                                                        |
-    | ??: 301  ??: 302             ???????: 303      ??????? |
-    | ??: 401  ??: 402           ???? ????: 403    ????????? |
-    '--------------------------------------------------------'
+	.--------------------------------------------------------.
+	| ????: 101    ?????: 102   ??????????: 103     ???: 104 |
+	|                                                        |
+	| ??: 301  ??: 302             ???????: 303      ??????? |
+	| ??: 401  ??: 402           ???? ????: 403    ????????? |
+	'--------------------------------------------------------'
 
 Here, ? represents text in a language you don't understand. This ticket might
 be represented as 101,102,103,104,301,302,303,401,402,403; of course, the
@@ -59,18 +59,18 @@ now.
 
 For example, suppose you have the following notes:
 
-    class: 1-3 or 5-7
-    row: 6-11 or 33-44
-    seat: 13-40 or 45-50
+	class: 1-3 or 5-7
+	row: 6-11 or 33-44
+	seat: 13-40 or 45-50
 
-    your ticket:
-    7,1,14
+	your ticket:
+	7,1,14
 
-    nearby tickets:
-    7,3,47
-    40,4,50
-    55,2,20
-    38,6,12
+	nearby tickets:
+	7,3,47
+	40,4,50
+	55,2,20
+	38,6,12
 
 It doesn't matter which position corresponds to which field; you can identify
 invalid nearby tickets by considering only whether tickets contain values that
@@ -102,17 +102,17 @@ third field, it is the third field on every ticket, including your ticket.
 
 For example, suppose you have the following notes:
 
-    class: 0-1 or 4-19
-    row: 0-5 or 8-19
-    seat: 0-13 or 16-19
+	class: 0-1 or 4-19
+	row: 0-5 or 8-19
+	seat: 0-13 or 16-19
 
-    your ticket:
-    11,12,13
+	your ticket:
+	11,12,13
 
-    nearby tickets:
-    3,9,18
-    15,1,5
-    5,14,9
+	nearby tickets:
+	3,9,18
+	15,1,5
+	5,14,9
 
 Based on the nearby tickets in the above example, the first position must be
 row, the second position must be class, and the third position must be seat;

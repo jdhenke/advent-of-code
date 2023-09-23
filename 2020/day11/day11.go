@@ -23,16 +23,16 @@ The seat layout fits neatly on a grid. Each position is either floor (.), an
 empty seat (L), or an occupied seat (#). For example, the initial seat layout
 might look like this:
 
-    L.LL.LL.LL
-    LLLLLLL.LL
-    L.L.L..L..
-    LLLL.LL.LL
-    L.LL.LL.LL
-    L.LLLLL.LL
-    ..L.L.....
-    LLLLLLLLLL
-    L.LLLLLL.L
-    L.LLLLL.LL
+	L.LL.LL.LL
+	LLLLLLL.LL
+	L.L.L..L..
+	LLLL.LL.LL
+	L.LL.LL.LL
+	L.LLLLL.LL
+	..L.L.....
+	LLLLLLLLLL
+	L.LLLLLL.L
+	L.LLLLL.LL
 
 Now, you just need to model the people who will be arriving shortly.
 Fortunately, people are entirely predictable and always follow a simple set of
@@ -52,65 +52,65 @@ Floor (.) never changes; seats don't move, and nobody sits on the floor.
 After one round of these rules, every seat in the example layout becomes
 occupied:
 
-    #.##.##.##
-    #######.##
-    #.#.#..#..
-    ####.##.##
-    #.##.##.##
-    #.#####.##
-    ..#.#.....
-    ##########
-    #.######.#
-    #.#####.##
+	#.##.##.##
+	#######.##
+	#.#.#..#..
+	####.##.##
+	#.##.##.##
+	#.#####.##
+	..#.#.....
+	##########
+	#.######.#
+	#.#####.##
 
 After a second round, the seats with four or more occupied adjacent seats
 become empty again:
 
-    #.LL.L#.##
-    #LLLLLL.L#
-    L.L.L..L..
-    #LLL.LL.L#
-    #.LL.LL.LL
-    #.LLLL#.##
-    ..L.L.....
-    #LLLLLLLL#
-    #.LLLLLL.L
-    #.#LLLL.##
+	#.LL.L#.##
+	#LLLLLL.L#
+	L.L.L..L..
+	#LLL.LL.L#
+	#.LL.LL.LL
+	#.LLLL#.##
+	..L.L.....
+	#LLLLLLLL#
+	#.LLLLLL.L
+	#.#LLLL.##
 
 This process continues for three more rounds:
 
-    #.##.L#.##
-    #L###LL.L#
-    L.#.#..#..
-    #L##.##.L#
-    #.##.LL.LL
-    #.###L#.##
-    ..#.#.....
-    #L######L#
-    #.LL###L.L
-    #.#L###.##
+	#.##.L#.##
+	#L###LL.L#
+	L.#.#..#..
+	#L##.##.L#
+	#.##.LL.LL
+	#.###L#.##
+	..#.#.....
+	#L######L#
+	#.LL###L.L
+	#.#L###.##
 
-    #.#L.L#.##
-    #LLL#LL.L#
-    L.L.L..#..
-    #LLL.##.L#
-    #.LL.LL.LL
-    #.LL#L#.##
-    ..L.L.....
-    #L#LLLL#L#
-    #.LLLLLL.L
-    #.#L#L#.##
+	#.#L.L#.##
+	#LLL#LL.L#
+	L.L.L..#..
+	#LLL.##.L#
+	#.LL.LL.LL
+	#.LL#L#.##
+	..L.L.....
+	#L#LLLL#L#
+	#.LLLLLL.L
+	#.#L#L#.##
 
-    #.#L.L#.##
-    #LLL#LL.L#
-    L.#.L..#..
-    #L##.##.L#
-    #.#L.LL.LL
-    #.#L#L#.##
-    ..L.L.....
-    #L#L##L#L#
-    #.LLLLLL.L
-    #.#L#L#.##
+	#.#L.L#.##
+	#LLL#LL.L#
+	L.#.L..#..
+	#L##.##.L#
+	#.#L.LL.LL
+	#.#L#L#.##
+	..L.L.....
+	#L#L##L#L#
+	#.LLLLLL.L
+	#.#L#L#.##
 
 At this point, something interesting happens: the chaos stabilizes and further
 applications of these rules cause no seats to change state! Once people stop
@@ -143,32 +143,32 @@ Now, instead of considering just the eight immediately adjacent seats, consider
 the first seat in each of those eight directions. For example, the empty seat
 below would see eight occupied seats:
 
-    .......#.
-    ...#.....
-    .#.......
-    .........
-    ..#L....#
-    ....#....
-    .........
-    #........
-    ...#.....
+	.......#.
+	...#.....
+	.#.......
+	.........
+	..#L....#
+	....#....
+	.........
+	#........
+	...#.....
 
 The leftmost empty seat below would only see one empty seat, but cannot see any
 of the occupied ones:
 
-    .............
-    .L.L.#.#.#.#.
-    .............
+	.............
+	.L.L.#.#.#.#.
+	.............
 
 The empty seat below would see no occupied seats:
 
-    .##.##.
-    #.#.#.#
-    ##...##
-    ...L...
-    ##...##
-    #.#.#.#
-    .##.##.
+	.##.##.
+	#.#.#.#
+	##...##
+	...L...
+	##...##
+	#.#.#.#
+	.##.##.
 
 Also, people seem to be more tolerant than you expected: it now takes five or
 more visible occupied seats for an occupied seat to become empty (rather than
@@ -179,82 +179,82 @@ change, and floor never changes.
 Given the same starting layout as above, these new rules cause the seating area
 to shift around as follows:
 
-    L.LL.LL.LL
-    LLLLLLL.LL
-    L.L.L..L..
-    LLLL.LL.LL
-    L.LL.LL.LL
-    L.LLLLL.LL
-    ..L.L.....
-    LLLLLLLLLL
-    L.LLLLLL.L
-    L.LLLLL.LL
+	L.LL.LL.LL
+	LLLLLLL.LL
+	L.L.L..L..
+	LLLL.LL.LL
+	L.LL.LL.LL
+	L.LLLLL.LL
+	..L.L.....
+	LLLLLLLLLL
+	L.LLLLLL.L
+	L.LLLLL.LL
 
-    #.##.##.##
-    #######.##
-    #.#.#..#..
-    ####.##.##
-    #.##.##.##
-    #.#####.##
-    ..#.#.....
-    ##########
-    #.######.#
-    #.#####.##
+	#.##.##.##
+	#######.##
+	#.#.#..#..
+	####.##.##
+	#.##.##.##
+	#.#####.##
+	..#.#.....
+	##########
+	#.######.#
+	#.#####.##
 
-    #.LL.LL.L#
-    #LLLLLL.LL
-    L.L.L..L..
-    LLLL.LL.LL
-    L.LL.LL.LL
-    L.LLLLL.LL
-    ..L.L.....
-    LLLLLLLLL#
-    #.LLLLLL.L
-    #.LLLLL.L#
+	#.LL.LL.L#
+	#LLLLLL.LL
+	L.L.L..L..
+	LLLL.LL.LL
+	L.LL.LL.LL
+	L.LLLLL.LL
+	..L.L.....
+	LLLLLLLLL#
+	#.LLLLLL.L
+	#.LLLLL.L#
 
-    #.L#.##.L#
-    #L#####.LL
-    L.#.#..#..
-    ##L#.##.##
-    #.##.#L.##
-    #.#####.#L
-    ..#.#.....
-    LLL####LL#
-    #.L#####.L
-    #.L####.L#
+	#.L#.##.L#
+	#L#####.LL
+	L.#.#..#..
+	##L#.##.##
+	#.##.#L.##
+	#.#####.#L
+	..#.#.....
+	LLL####LL#
+	#.L#####.L
+	#.L####.L#
 
-    #.L#.L#.L#
-    #LLLLLL.LL
-    L.L.L..#..
-    ##LL.LL.L#
-    L.LL.LL.L#
-    #.LLLLL.LL
-    ..L.L.....
-    LLLLLLLLL#
-    #.LLLLL#.L
-    #.L#LL#.L#
+	#.L#.L#.L#
+	#LLLLLL.LL
+	L.L.L..#..
+	##LL.LL.L#
+	L.LL.LL.L#
+	#.LLLLL.LL
+	..L.L.....
+	LLLLLLLLL#
+	#.LLLLL#.L
+	#.L#LL#.L#
 
-    #.L#.L#.L#
-    #LLLLLL.LL
-    L.L.L..#..
-    ##L#.#L.L#
-    L.L#.#L.L#
-    #.L####.LL
-    ..#.#.....
-    LLL###LLL#
-    #.LLLLL#.L
-    #.L#LL#.L#
+	#.L#.L#.L#
+	#LLLLLL.LL
+	L.L.L..#..
+	##L#.#L.L#
+	L.L#.#L.L#
+	#.L####.LL
+	..#.#.....
+	LLL###LLL#
+	#.LLLLL#.L
+	#.L#LL#.L#
 
-    #.L#.L#.L#
-    #LLLLLL.LL
-    L.L.L..#..
-    ##L#.#L.L#
-    L.L#.LL.L#
-    #.LLLL#.LL
-    ..#.L.....
-    LLL###LLL#
-    #.LLLLL#.L
-    #.L#LL#.L#
+	#.L#.L#.L#
+	#LLLLLL.LL
+	L.L.L..#..
+	##L#.#L.L#
+	L.L#.LL.L#
+	#.LLLL#.LL
+	..#.L.....
+	LLL###LLL#
+	#.LLLLL#.L
+	#.L#LL#.L#
 
 Again, at this point, people stop shifting around and the seating area reaches
 equilibrium. Once this occurs, you count 26 occupied seats.

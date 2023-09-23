@@ -39,11 +39,11 @@ east if the following action were F.)
 
 For example:
 
-    F10
-    N3
-    F7
-    R90
-    F11
+	F10
+	N3
+	F7
+	R90
+	F11
 
 These instructions would be handled as follows:
 

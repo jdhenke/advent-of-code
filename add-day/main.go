@@ -158,8 +158,8 @@ func createDay(year, day int, session string) error {
 	if err := os.WriteFile(filepath.Join(fmt.Sprint(year), fmt.Sprintf("day%d", day), "input.txt"), inputBytes, 0644); err != nil {
 		return err
 	}
-	if err := exec.Command("go", "fmt", filepath.Join(".", fmt.Sprint(year), fmt.Sprint(day))).Run(); err != nil {
-		return err
+	if b, err := exec.Command("go", "fmt", fmt.Sprintf("./%d/day%d", year, day)).CombinedOutput(); err != nil {
+		return fmt.Errorf("%s: %w", string(b), err)
 	}
 	return nil
 }

@@ -3,12 +3,11 @@ package intcode
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"strconv"
 )
 
 func Parse(r io.Reader) (Code, error) {
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}

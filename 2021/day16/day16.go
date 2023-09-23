@@ -3,7 +3,6 @@ package day16
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"strconv"
 )
 
@@ -23,22 +22,22 @@ The first step of decoding the message is to convert the hexadecimal
 representation into binary. Each character of hexadecimal corresponds to four
 bits of binary data:
 
-    0 = 0000
-    1 = 0001
-    2 = 0010
-    3 = 0011
-    4 = 0100
-    5 = 0101
-    6 = 0110
-    7 = 0111
-    8 = 1000
-    9 = 1001
-    A = 1010
-    B = 1011
-    C = 1100
-    D = 1101
-    E = 1110
-    F = 1111
+	0 = 0000
+	1 = 0001
+	2 = 0010
+	3 = 0011
+	4 = 0100
+	5 = 0101
+	6 = 0110
+	7 = 0111
+	8 = 1000
+	9 = 1001
+	A = 1010
+	B = 1011
+	C = 1100
+	D = 1101
+	E = 1110
+	F = 1111
 
 The BITS transmission contains a single packet at its outermost layer which
 itself contains many other packets. The hexadecimal representation of this
@@ -58,8 +57,8 @@ groups of four bits. Each group is prefixed by a 1 bit except the last group,
 which is prefixed by a 0 bit. These groups of five bits immediately follow the
 packet header. For example, the hexadecimal string D2FE28 becomes:
 
-    110100101111111000101000
-    VVVTTTAAAAABBBBBCCCCC
+	110100101111111000101000
+	VVVTTTAAAAABBBBBCCCCC
 
 Below each bit is a label indicating its purpose:
 
@@ -100,8 +99,8 @@ sub-packets appear.
 For example, here is an operator packet (hexadecimal string 38006F45291200)
 with length type ID 0 that contains two sub-packets:
 
-    00111000000000000110111101000101001010010001001000000000
-    VVVTTTILLLLLLLLLLLLLLLAAAAAAAAAAABBBBBBBBBBBBBBBB
+	00111000000000000110111101000101001010010001001000000000
+	VVVTTTILLLLLLLLLLLLLLLAAAAAAAAAAABBBBBBBBBBBBBBBB
 
 - The three bits labeled V (001) are the packet version, 1.
 - The three bits labeled T (110) are the packet type ID, 6, which means the
@@ -121,8 +120,8 @@ L (27) is reached, and so parsing of this packet stops.
 As another example, here is an operator packet (hexadecimal string
 EE00D40C823060) with length type ID 1 that contains three sub-packets:
 
-    11101110000000001101010000001100100000100011000001100000
-    VVVTTTILLLLLLLLLLLAAAAAAAAAAABBBBBBBBBBBCCCCCCCCCCC
+	11101110000000001101010000001100100000100011000001100000
+	VVVTTTILLLLLLLLLLLAAAAAAAAAAABBBBBBBBBBBCCCCCCCCCCC
 
 - The three bits labeled V (111) are the packet version, 7.
 - The three bits labeled T (011) are the packet type ID, 3, which means the
@@ -304,7 +303,7 @@ func calculate(packet *Packet) int {
 }
 
 func toBinary(r io.Reader) (string, error) {
-	hexText, err := ioutil.ReadAll(r)
+	hexText, err := io.ReadAll(r)
 	if err != nil {
 		return "", err
 	}
@@ -329,7 +328,7 @@ func toBinary(r io.Reader) (string, error) {
 			"F": "1111",
 		}[string(hexText[i:i+1])])
 	}
-	text := string(b.Bytes())
+	text := b.String()
 	return text, nil
 }
 

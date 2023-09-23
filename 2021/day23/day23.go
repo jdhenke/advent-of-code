@@ -4,7 +4,6 @@ import (
 	"container/heap"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"regexp"
 	"sort"
 )
@@ -18,14 +17,14 @@ import (
 //
 // In the "hallway" the positions are 0,1,2,3,4,5,6 as shown:
 //
-//     #############
-//     #01.2.3.4.56#
-//     ###A#B#C#D### 0 (1s)
-//       #A#B#C#D#   1
-//       #A#B#C#D#   2
-//       #A#B#C#D#   3
-//       #########
-//        1 2 3 4    <-- (10s)
+//	#############
+//	#01.2.3.4.56#
+//	###A#B#C#D### 0 (1s)
+//	  #A#B#C#D#   1
+//	  #A#B#C#D#   2
+//	  #A#B#C#D#   3
+//	  #########
+//	   1 2 3 4    <-- (10s)
 //
 // In each of their "homes", the positions have a tens value of 1 for A's home, 2 for B's, etc... and a ones value of
 // 0 right next to the hallway, 1 the next position down, etc... So for example, 23 would mean B's bottom most home
@@ -55,21 +54,21 @@ otherwise open space), walls (#), and open space (.).
 
 For example:
 
-    #############
-    #...........#
-    ###B#C#B#D###
-      #A#D#C#A#
-      #########
+	#############
+	#...........#
+	###B#C#B#D###
+	  #A#D#C#A#
+	  #########
 
 The amphipods would like a method to organize every amphipod into side rooms so
 that each side room contains one type of amphipod and the types are sorted A-D
 going left to right, like this:
 
-    #############
-    #...........#
-    ###A#B#C#D###
-      #A#B#C#D#
-      #########
+	#############
+	#...........#
+	###A#B#C#D###
+	  #A#B#C#D#
+	  #########
 
 Amphipods can move up, down, left, or right so long as they are moving into an
 unoccupied open space. Each type of amphipod requires a different amount of
@@ -102,71 +101,71 @@ energy. One way to do this is shown below.
 
 Starting configuration:
 
-    #############
-    #...........#
-    ###B#C#B#D###
-      #A#D#C#A#
-      #########
+	#############
+	#...........#
+	###B#C#B#D###
+	  #A#D#C#A#
+	  #########
 
 One Bronze amphipod moves into the hallway, taking 4 steps and using 40 energy:
 
-    #############
-    #...B.......#
-    ###B#C#.#D###
-      #A#D#C#A#
-      #########
+	#############
+	#...B.......#
+	###B#C#.#D###
+	  #A#D#C#A#
+	  #########
 
 The only Copper amphipod not in its side room moves there, taking 4 steps and
 using 400 energy:
 
-    #############
-    #...B.......#
-    ###B#.#C#D###
-      #A#D#C#A#
-      #########
+	#############
+	#...B.......#
+	###B#.#C#D###
+	  #A#D#C#A#
+	  #########
 
 A Desert amphipod moves out of the way, taking 3 steps and using 3000 energy,
 and then the Bronze amphipod takes its place, taking 3 steps and using 30
 energy:
 
-    #############
-    #.....D.....#
-    ###B#.#C#D###
-      #A#B#C#A#
-      #########
+	#############
+	#.....D.....#
+	###B#.#C#D###
+	  #A#B#C#A#
+	  #########
 
 The leftmost Bronze amphipod moves to its room using 40 energy:
 
-    #############
-    #.....D.....#
-    ###.#B#C#D###
-      #A#B#C#A#
-      #########
+	#############
+	#.....D.....#
+	###.#B#C#D###
+	  #A#B#C#A#
+	  #########
 
 Both amphipods in the rightmost room move into the hallway, using 2003 energy
 in total:
 
-    #############
-    #.....D.D.A.#
-    ###.#B#C#.###
-      #A#B#C#.#
-      #########
+	#############
+	#.....D.D.A.#
+	###.#B#C#.###
+	  #A#B#C#.#
+	  #########
 
 Both Desert amphipods move into the rightmost room using 7000 energy:
 
-    #############
-    #.........A.#
-    ###.#B#C#D###
-      #A#B#C#D#
-      #########
+	#############
+	#.........A.#
+	###.#B#C#D###
+	  #A#B#C#D#
+	  #########
 
 Finally, the last Amber amphipod moves into its room, using 8 energy:
 
-    #############
-    #...........#
-    ###A#B#C#D###
-      #A#B#C#D#
-      #########
+	#############
+	#...........#
+	###A#B#C#D###
+	  #A#B#C#D#
+	  #########
 
 What is the least energy required to organize the amphipods?
 */
@@ -194,223 +193,223 @@ part of the diagram.
 Between the first and second lines of text that contain amphipod starting
 positions, insert the following lines:
 
-      #D#C#B#A#
-      #D#B#A#C#
+	#D#C#B#A#
+	#D#B#A#C#
 
 So, the above example now becomes:
 
-    #############
-    #...........#
-    ###B#C#B#D###
-      #D#C#B#A#
-      #D#B#A#C#
-      #A#D#C#A#
-      #########
+	#############
+	#...........#
+	###B#C#B#D###
+	  #D#C#B#A#
+	  #D#B#A#C#
+	  #A#D#C#A#
+	  #########
 
 The amphipods still want to be organized into rooms similar to before:
 
-    #############
-    #...........#
-    ###A#B#C#D###
-      #A#B#C#D#
-      #A#B#C#D#
-      #A#B#C#D#
-      #########
+	#############
+	#...........#
+	###A#B#C#D###
+	  #A#B#C#D#
+	  #A#B#C#D#
+	  #A#B#C#D#
+	  #########
 
 In this updated example, the least energy required to organize these amphipods
 is 44169:
 
-    #############
-    #...........#
-    ###B#C#B#D###
-      #D#C#B#A#
-      #D#B#A#C#
-      #A#D#C#A#
-      #########
+	#############
+	#...........#
+	###B#C#B#D###
+	  #D#C#B#A#
+	  #D#B#A#C#
+	  #A#D#C#A#
+	  #########
 
-    #############
-    #..........D#
-    ###B#C#B#.###
-      #D#C#B#A#
-      #D#B#A#C#
-      #A#D#C#A#
-      #########
+	#############
+	#..........D#
+	###B#C#B#.###
+	  #D#C#B#A#
+	  #D#B#A#C#
+	  #A#D#C#A#
+	  #########
 
-    #############
-    #A.........D#
-    ###B#C#B#.###
-      #D#C#B#.#
-      #D#B#A#C#
-      #A#D#C#A#
-      #########
+	#############
+	#A.........D#
+	###B#C#B#.###
+	  #D#C#B#.#
+	  #D#B#A#C#
+	  #A#D#C#A#
+	  #########
 
-    #############
-    #A........BD#
-    ###B#C#.#.###
-      #D#C#B#.#
-      #D#B#A#C#
-      #A#D#C#A#
-      #########
+	#############
+	#A........BD#
+	###B#C#.#.###
+	  #D#C#B#.#
+	  #D#B#A#C#
+	  #A#D#C#A#
+	  #########
 
-    #############
-    #A......B.BD#
-    ###B#C#.#.###
-      #D#C#.#.#
-      #D#B#A#C#
-      #A#D#C#A#
-      #########
+	#############
+	#A......B.BD#
+	###B#C#.#.###
+	  #D#C#.#.#
+	  #D#B#A#C#
+	  #A#D#C#A#
+	  #########
 
-    #############
-    #AA.....B.BD#
-    ###B#C#.#.###
-      #D#C#.#.#
-      #D#B#.#C#
-      #A#D#C#A#
-      #########
+	#############
+	#AA.....B.BD#
+	###B#C#.#.###
+	  #D#C#.#.#
+	  #D#B#.#C#
+	  #A#D#C#A#
+	  #########
 
-    #############
-    #AA.....B.BD#
-    ###B#.#.#.###
-      #D#C#.#.#
-      #D#B#C#C#
-      #A#D#C#A#
-      #########
+	#############
+	#AA.....B.BD#
+	###B#.#.#.###
+	  #D#C#.#.#
+	  #D#B#C#C#
+	  #A#D#C#A#
+	  #########
 
-    #############
-    #AA.....B.BD#
-    ###B#.#.#.###
-      #D#.#C#.#
-      #D#B#C#C#
-      #A#D#C#A#
-      #########
+	#############
+	#AA.....B.BD#
+	###B#.#.#.###
+	  #D#.#C#.#
+	  #D#B#C#C#
+	  #A#D#C#A#
+	  #########
 
-    #############
-    #AA...B.B.BD#
-    ###B#.#.#.###
-      #D#.#C#.#
-      #D#.#C#C#
-      #A#D#C#A#
-      #########
+	#############
+	#AA...B.B.BD#
+	###B#.#.#.###
+	  #D#.#C#.#
+	  #D#.#C#C#
+	  #A#D#C#A#
+	  #########
 
-    #############
-    #AA.D.B.B.BD#
-    ###B#.#.#.###
-      #D#.#C#.#
-      #D#.#C#C#
-      #A#.#C#A#
-      #########
+	#############
+	#AA.D.B.B.BD#
+	###B#.#.#.###
+	  #D#.#C#.#
+	  #D#.#C#C#
+	  #A#.#C#A#
+	  #########
 
-    #############
-    #AA.D...B.BD#
-    ###B#.#.#.###
-      #D#.#C#.#
-      #D#.#C#C#
-      #A#B#C#A#
-      #########
+	#############
+	#AA.D...B.BD#
+	###B#.#.#.###
+	  #D#.#C#.#
+	  #D#.#C#C#
+	  #A#B#C#A#
+	  #########
 
-    #############
-    #AA.D.....BD#
-    ###B#.#.#.###
-      #D#.#C#.#
-      #D#B#C#C#
-      #A#B#C#A#
-      #########
+	#############
+	#AA.D.....BD#
+	###B#.#.#.###
+	  #D#.#C#.#
+	  #D#B#C#C#
+	  #A#B#C#A#
+	  #########
 
-    #############
-    #AA.D......D#
-    ###B#.#.#.###
-      #D#B#C#.#
-      #D#B#C#C#
-      #A#B#C#A#
-      #########
+	#############
+	#AA.D......D#
+	###B#.#.#.###
+	  #D#B#C#.#
+	  #D#B#C#C#
+	  #A#B#C#A#
+	  #########
 
-    #############
-    #AA.D......D#
-    ###B#.#C#.###
-      #D#B#C#.#
-      #D#B#C#.#
-      #A#B#C#A#
-      #########
+	#############
+	#AA.D......D#
+	###B#.#C#.###
+	  #D#B#C#.#
+	  #D#B#C#.#
+	  #A#B#C#A#
+	  #########
 
-    #############
-    #AA.D.....AD#
-    ###B#.#C#.###
-      #D#B#C#.#
-      #D#B#C#.#
-      #A#B#C#.#
-      #########
+	#############
+	#AA.D.....AD#
+	###B#.#C#.###
+	  #D#B#C#.#
+	  #D#B#C#.#
+	  #A#B#C#.#
+	  #########
 
-    #############
-    #AA.......AD#
-    ###B#.#C#.###
-      #D#B#C#.#
-      #D#B#C#.#
-      #A#B#C#D#
-      #########
+	#############
+	#AA.......AD#
+	###B#.#C#.###
+	  #D#B#C#.#
+	  #D#B#C#.#
+	  #A#B#C#D#
+	  #########
 
-    #############
-    #AA.......AD#
-    ###.#B#C#.###
-      #D#B#C#.#
-      #D#B#C#.#
-      #A#B#C#D#
-      #########
+	#############
+	#AA.......AD#
+	###.#B#C#.###
+	  #D#B#C#.#
+	  #D#B#C#.#
+	  #A#B#C#D#
+	  #########
 
-    #############
-    #AA.......AD#
-    ###.#B#C#.###
-      #.#B#C#.#
-      #D#B#C#D#
-      #A#B#C#D#
-      #########
+	#############
+	#AA.......AD#
+	###.#B#C#.###
+	  #.#B#C#.#
+	  #D#B#C#D#
+	  #A#B#C#D#
+	  #########
 
-    #############
-    #AA.D.....AD#
-    ###.#B#C#.###
-      #.#B#C#.#
-      #.#B#C#D#
-      #A#B#C#D#
-      #########
+	#############
+	#AA.D.....AD#
+	###.#B#C#.###
+	  #.#B#C#.#
+	  #.#B#C#D#
+	  #A#B#C#D#
+	  #########
 
-    #############
-    #A..D.....AD#
-    ###.#B#C#.###
-      #.#B#C#.#
-      #A#B#C#D#
-      #A#B#C#D#
-      #########
+	#############
+	#A..D.....AD#
+	###.#B#C#.###
+	  #.#B#C#.#
+	  #A#B#C#D#
+	  #A#B#C#D#
+	  #########
 
-    #############
-    #...D.....AD#
-    ###.#B#C#.###
-      #A#B#C#.#
-      #A#B#C#D#
-      #A#B#C#D#
-      #########
+	#############
+	#...D.....AD#
+	###.#B#C#.###
+	  #A#B#C#.#
+	  #A#B#C#D#
+	  #A#B#C#D#
+	  #########
 
-    #############
-    #.........AD#
-    ###.#B#C#.###
-      #A#B#C#D#
-      #A#B#C#D#
-      #A#B#C#D#
-      #########
+	#############
+	#.........AD#
+	###.#B#C#.###
+	  #A#B#C#D#
+	  #A#B#C#D#
+	  #A#B#C#D#
+	  #########
 
-    #############
-    #..........D#
-    ###A#B#C#.###
-      #A#B#C#D#
-      #A#B#C#D#
-      #A#B#C#D#
-      #########
+	#############
+	#..........D#
+	###A#B#C#.###
+	  #A#B#C#D#
+	  #A#B#C#D#
+	  #A#B#C#D#
+	  #########
 
-    #############
-    #...........#
-    ###A#B#C#D###
-      #A#B#C#D#
-      #A#B#C#D#
-      #A#B#C#D#
-      #########
+	#############
+	#...........#
+	###A#B#C#D###
+	  #A#B#C#D#
+	  #A#B#C#D#
+	  #A#B#C#D#
+	  #########
 
 Using the initial configuration from the full diagram, what is the least energy
 required to organize the amphipods?
@@ -460,7 +459,7 @@ var re = regexp.MustCompile(`#############
 // Returns a board parsed as in part 1 but with the size of part 2, filling in the bottom two rows as already being
 // solved so the same logic can be used to solve both parts.
 func parseBoard(r io.Reader) (Board, error) {
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		return Board{}, err
 	}

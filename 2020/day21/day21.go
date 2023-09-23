@@ -38,10 +38,10 @@ it, or maybe it was labeled in a language you don't know.
 
 For example, consider the following list of foods:
 
-    mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
-    trh fvjkl sbzzf mxmxvkd (contains dairy)
-    sqjhc fvjkl (contains soy)
-    sqjhc mxmxvkd sbzzf (contains fish)
+	mxmxvkd kfcds sqjhc nhms (contains dairy, fish)
+	trh fvjkl sbzzf mxmxvkd (contains dairy)
+	sqjhc fvjkl (contains soy)
+	sqjhc mxmxvkd sbzzf (contains fish)
 
 The first food in the list has four ingredients (written in a language you
 don't understand): mxmxvkd, kfcds, sqjhc, and nhms. While the food might
@@ -59,6 +59,9 @@ your list. How many times do any of those ingredients appear?
 */
 func Part1(r io.Reader) (answer int, err error) {
 	counts, solution, err := day21(r)
+	if err != nil {
+		return 0, err
+	}
 	for ing, count := range counts {
 		if _, ok := solution[ing]; !ok {
 			answer += count
@@ -90,6 +93,9 @@ ingredient list?
 */
 func Part2(r io.Reader) (answer int, err error) {
 	_, solution, err := day21(r)
+	if err != nil {
+		return 0, err
+	}
 	type pair struct {
 		ingredient
 		allergen

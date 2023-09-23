@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -21,7 +20,7 @@ func Ensure(year, day, part int, session string) error {
 		return err
 	}
 	p := filepath.Join(fmt.Sprint(year), fmt.Sprintf("day%d", day), fmt.Sprintf("day%d.go", day))
-	b, err := ioutil.ReadFile(p)
+	b, err := os.ReadFile(p)
 	if err != nil {
 		return err
 	}
@@ -31,7 +30,7 @@ Part%d Prompt
 
 %s*/$2`, part, prompt)
 	s := regexp.MustCompile(fmt.Sprintf("(?s)(\n/\\*\nPart%d.+\\*/)?(\nfunc Part%d)", part, part)).ReplaceAllString(string(b), withDoc)
-	if err := ioutil.WriteFile(p, []byte(s), 0644); err != nil {
+	if err := os.WriteFile(p, []byte(s), 0644); err != nil {
 		return err
 	}
 	return nil
@@ -53,7 +52,7 @@ func getPrompt(year, day, part int, session string) (prompt string, err error) {
 		return "", err
 	}
 	defer func() {
-		_, _ = ioutil.ReadAll(resp.Body)
+		_, _ = io.ReadAll(resp.Body)
 		_ = resp.Body.Close()
 	}()
 	if resp.StatusCode != 200 {

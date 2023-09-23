@@ -2,7 +2,6 @@ package day24
 
 import (
 	"io"
-	"io/ioutil"
 	"strconv"
 	"strings"
 )
@@ -54,33 +53,33 @@ serious ALU program.)
 For example, here is an ALU program which takes an input number, negates it,
 and stores it in x:
 
-    inp x
-    mul x -1
+	inp x
+	mul x -1
 
 Here is an ALU program which takes two input numbers, then sets z to 1 if the
 second input number is three times larger than the first input number, or sets
 z to 0 otherwise:
 
-    inp z
-    inp x
-    mul z 3
-    eql z x
+	inp z
+	inp x
+	mul z 3
+	eql z x
 
 Here is an ALU program which takes a non-negative integer as input, converts it
 into binary, and stores the lowest (1's) bit in z, the second-lowest (2's) bit
 in y, the third-lowest (4's) bit in x, and the fourth-lowest (8's) bit in w:
 
-    inp w
-    add z w
-    mod z 2
-    div w 2
-    add y w
-    mod y 2
-    div w 2
-    add x w
-    mod x 2
-    div w 2
-    mod w 2
+	inp w
+	add z w
+	mod z 2
+	div w 2
+	add y w
+	mod y 2
+	div w 2
+	add x w
+	mod x 2
+	div w 2
+	mod w 2
 
 Once you have built a replacement ALU, you can install it in the submarine,
 which will immediately resume what it was doing when the ALU failed: validating
@@ -129,7 +128,7 @@ func Part2(r io.Reader) (answer int, err error) {
 
 // Shamelessly copied: https://pastebin.com/C6jztZyU
 func day24(r io.Reader, max bool) (answer int, err error) {
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return 0, err
 	}

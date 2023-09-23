@@ -3,7 +3,6 @@ package input
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 )
 
 type grid struct {
@@ -51,7 +50,7 @@ func WithInfiniteColumns() Option {
 }
 
 func NewGrid(r io.Reader, opts ...Option) (Grid, error) {
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}

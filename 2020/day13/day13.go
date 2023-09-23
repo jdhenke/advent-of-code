@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"strconv"
 	"strings"
 )
@@ -213,7 +212,7 @@ func Part2(r io.Reader) (answer int, err error) {
 }
 
 func parse(r io.Reader) (t int, buses []int, err error) {
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return 0, nil, nil
 	}

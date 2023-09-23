@@ -3,7 +3,6 @@ package day15
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"strconv"
 )
 
@@ -122,7 +121,7 @@ func day15(r io.Reader, n int) (answer int, err error) {
 }
 
 func parseNums(r io.Reader) ([]int, error) {
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}

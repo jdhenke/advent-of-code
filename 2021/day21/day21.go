@@ -2,7 +2,6 @@ package day21
 
 import (
 	"io"
-	"io/ioutil"
 	"regexp"
 	"strconv"
 	"strings"
@@ -41,8 +40,8 @@ again. Play using this die.
 
 For example, given these starting positions:
 
-    Player 1 starting position: 4
-    Player 2 starting position: 8
+	Player 1 starting position: 4
+	Player 2 starting position: 8
 
 This is how the game would go:
 
@@ -140,7 +139,7 @@ func Part2(r io.Reader) (answer int, err error) {
 }
 
 func getLocs(r io.Reader) (loc1, loc2 int, err error) {
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return 0, 0, err
 	}

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -110,14 +110,14 @@ func createDay(year, day int, session string) error {
 		return err
 	}
 	f := sub(libFile, year, day)
-	if err := ioutil.WriteFile(filepath.Join(dir, fmt.Sprintf("day%d.go", day)), []byte(f), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, fmt.Sprintf("day%d.go", day)), []byte(f), 0644); err != nil {
 		return err
 	}
 	tf := sub(testFile, year, day)
-	if err := ioutil.WriteFile(filepath.Join(dir, fmt.Sprintf("day%d_test.go", day)), []byte(tf), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, fmt.Sprintf("day%d_test.go", day)), []byte(tf), 0644); err != nil {
 		return err
 	}
-	mainBytes, err := ioutil.ReadFile("main.go")
+	mainBytes, err := os.ReadFile("main.go")
 	if err != nil {
 		return err
 	}
@@ -144,18 +144,18 @@ func createDay(year, day int, session string) error {
 		}
 		_, _ = fmt.Fprintln(&buf, line)
 		if strings.HasPrefix(line, `import (`) {
-			_, _ = fmt.Fprintln(&buf, fmt.Sprintf("\taoc%dday%d \"github.com/jdhenke/advent-of-code/%d/day%d\"", year, day, year, day))
+			_, _ = fmt.Fprintf(&buf, "\taoc%dday%d \"github.com/jdhenke/advent-of-code/%d/day%d\"\n", year, day, year, day)
 		}
 	}
 	_, _ = buf.Write([]byte("\n"))
-	if err := ioutil.WriteFile("main.go", buf.Bytes(), 0644); err != nil {
+	if err := os.WriteFile("main.go", buf.Bytes(), 0644); err != nil {
 		return err
 	}
 	inputBytes, err := getInputBytes(year, day, session)
 	if err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(filepath.Join(fmt.Sprint(year), fmt.Sprintf("day%d", day), "input.txt"), inputBytes, 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(fmt.Sprint(year), fmt.Sprintf("day%d", day), "input.txt"), inputBytes, 0644); err != nil {
 		return err
 	}
 	if err := exec.Command("go", "fmt", filepath.Join(".", fmt.Sprint(year), fmt.Sprint(day))).Run(); err != nil {
@@ -199,11 +199,11 @@ func getInputBytes(year, day int, session string) ([]byte, error) {
 		return nil, err
 	}
 	defer func() {
-		_, _ = ioutil.ReadAll(resp.Body)
+		_, _ = io.ReadAll(resp.Body)
 		_ = resp.Body.Close()
 	}()
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("bad status: %v", resp.Status)
 	}
-	return ioutil.ReadAll(resp.Body)
+	return io.ReadAll(resp.Body)
 }

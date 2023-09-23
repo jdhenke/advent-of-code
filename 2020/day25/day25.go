@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"strconv"
 )
 
@@ -101,7 +100,7 @@ func Part2(r io.Reader) (answer int, err error) {
 
 func day25(r io.Reader) (answer int, err error) {
 	// parse public keys
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return 0, err
 	}

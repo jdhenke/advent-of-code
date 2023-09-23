@@ -2,14 +2,13 @@ package input
 
 import (
 	"io"
-	"io/ioutil"
 	"strconv"
 	"strings"
 )
 
 func GetNumList(r io.Reader) ([]int, error) {
 	var nums []int
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}

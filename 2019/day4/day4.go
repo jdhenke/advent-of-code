@@ -3,7 +3,6 @@ package day4
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"strconv"
 )
 
@@ -61,7 +60,7 @@ func Part2(r io.Reader) (answer int, err error) {
 }
 
 func day4(r io.Reader, matchesFunc func(digits []int) bool) (answer int, err error) {
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return 0, err
 	}

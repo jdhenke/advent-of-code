@@ -53,26 +53,26 @@ respectively.
 Here is a larger example which only considers the previous 5 numbers (and has a
 preamble of length 5):
 
-    35
-    20
-    15
-    25
-    47
-    40
-    62
-    55
-    65
-    95
-    102
-    117
-    150
-    182
-    127
-    219
-    299
-    277
-    309
-    576
+	35
+	20
+	15
+	25
+	47
+	40
+	62
+	55
+	65
+	95
+	102
+	117
+	150
+	182
+	127
+	219
+	299
+	277
+	309
+	576
 
 In this example, after the 5-number preamble, almost every number is the sum of
 two of the previous 5 numbers; the only number that does not follow this rule
@@ -154,26 +154,26 @@ which sum to the invalid number from step 1.
 
 Again consider the above example:
 
-    35
-    20
-    15
-    25
-    47
-    40
-    62
-    55
-    65
-    95
-    102
-    117
-    150
-    182
-    127
-    219
-    299
-    277
-    309
-    576
+	35
+	20
+	15
+	25
+	47
+	40
+	62
+	55
+	65
+	95
+	102
+	117
+	150
+	182
+	127
+	219
+	299
+	277
+	309
+	576
 
 In this list, adding up all of the numbers from 15 through 40 produces the
 invalid number from step 1, 127. (Of course, the contiguous set of numbers in

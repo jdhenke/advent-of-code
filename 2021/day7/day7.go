@@ -32,7 +32,7 @@ fuel as possible.
 
 For example, consider the following horizontal positions:
 
-    16,1,2,0,4,2,7,1,2,14
+	16,1,2,0,4,2,7,1,2,14
 
 This means there's a crab with horizontal position 16, a crab with horizontal
 position 1, and so on.

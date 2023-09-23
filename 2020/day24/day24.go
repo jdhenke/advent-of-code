@@ -46,26 +46,26 @@ nwwswee flips the reference tile itself.
 
 Here is a larger example:
 
-    sesenwnenenewseeswwswswwnenewsewsw
-    neeenesenwnwwswnenewnwwsewnenwseswesw
-    seswneswswsenwwnwse
-    nwnwneseeswswnenewneswwnewseswneseene
-    swweswneswnenwsewnwneneseenw
-    eesenwseswswnenwswnwnwsewwnwsene
-    sewnenenenesenwsewnenwwwse
-    wenwwweseeeweswwwnwwe
-    wsweesenenewnwwnwsenewsenwwsesesenwne
-    neeswseenwwswnwswswnw
-    nenwswwsewswnenenewsenwsenwnesesenew
-    enewnwewneswsewnwswenweswnenwsenwsw
-    sweneswneswneneenwnewenewwneswswnese
-    swwesenesewenwneswnwwneseswwne
-    enesenwswwswneneswsenwnewswseenwsese
-    wnwnesenesenenwwnenwsewesewsesesew
-    nenewswnwewswnenesenwnesewesw
-    eneswnwswnwsenenwnwnwwseeswneewsenese
-    neswnwewnwnwseenwseesewsenwsweewe
-    wseweeenwnesenwwwswnew
+	sesenwnenenewseeswwswswwnenewsewsw
+	neeenesenwnwwswnenewnwwsewnenwseswesw
+	seswneswswsenwwnwse
+	nwnwneseeswswnenewneswwnewseswneseene
+	swweswneswnenwsewnwneneseenw
+	eesenwseswswnenwswnwnwsewwnwsene
+	sewnenenenesenwsewnenwwwse
+	wenwwweseeeweswwwnwwe
+	wsweesenenewnwwnwsenewsenwwsesesenwne
+	neeswseenwwswnwswswnw
+	nenwswwsewswnenenewsenwsenwnesesenew
+	enewnwewneswsewnwswenweswnenwsenwsw
+	sweneswneswneneenwnewenewwneswswnese
+	swwesenesewenwneswnwwneseswwne
+	enesenwswwswneneswsenwnewswseenwsese
+	wnwnesenesenenwwnenwsewesewsesesew
+	nenewswnwewswnenesenwnesewesw
+	eneswnwswnwsenenwnwnwwseeswneewsenese
+	neswnwewnwnwseenwseesewsenwsweewe
+	wseweeenwnesenwwwswnew
 
 In the above example, 10 tiles are flipped once (to black), and 5 more are
 flipped twice (to black, then back to white). After all of these instructions
@@ -105,26 +105,26 @@ the same time.
 In the above example, the number of black tiles that are facing up after the
 given number of days has passed is as follows:
 
-    Day 1: 15
-    Day 2: 12
-    Day 3: 25
-    Day 4: 14
-    Day 5: 23
-    Day 6: 28
-    Day 7: 41
-    Day 8: 37
-    Day 9: 49
-    Day 10: 37
+	Day 1: 15
+	Day 2: 12
+	Day 3: 25
+	Day 4: 14
+	Day 5: 23
+	Day 6: 28
+	Day 7: 41
+	Day 8: 37
+	Day 9: 49
+	Day 10: 37
 
-    Day 20: 132
-    Day 30: 259
-    Day 40: 406
-    Day 50: 566
-    Day 60: 788
-    Day 70: 1106
-    Day 80: 1373
-    Day 90: 1844
-    Day 100: 2208
+	Day 20: 132
+	Day 30: 259
+	Day 40: 406
+	Day 50: 566
+	Day 60: 788
+	Day 70: 1106
+	Day 80: 1373
+	Day 90: 1844
+	Day 100: 2208
 
 After executing this process a total of 100 times, there would be 2208 black
 tiles facing up.

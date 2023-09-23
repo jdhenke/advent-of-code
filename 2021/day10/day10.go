@@ -14,7 +14,7 @@ Part1 Prompt
 You ask the submarine to determine the best route out of the deep-sea cave, but
 it only replies:
 
-    Syntax error in navigation subsystem on line: all of them
+	Syntax error in navigation subsystem on line: all of them
 
 All of them?! The damage is worse than you thought. You bring up a copy of the
 navigation subsystem (your puzzle input).
@@ -47,16 +47,16 @@ presence causes the whole line to be considered corrupted.
 
 For example, consider the following navigation subsystem:
 
-    [({(<(())[]>[[{[]{<()<>>
-    [(()[<>])]({[<{<<[]>>(
-    {([(<{}[<>[]}>{[]{[(<()>
-    (((({<>}<{<{<>}{[]{[]{}
-    [[<[([]))<([[{}[[()]]]
-    [{[{({}]{}}([{[{{{}}([]
-    {<[[]]>}<{[{[{[]{()[[[]
-    [<(<(<(<{}))><([]([]()
-    <{([([[(<>()){}]>(<<{{
-    <{([{{}}[<[[[<>{}]]]>[]]
+	[({(<(())[]>[[{[]{<()<>>
+	[(()[<>])]({[<{<<[]>>(
+	{([(<{}[<>[]}>{[]{[(<()>
+	(((({<>}<{<{<>}{[]{[]{}
+	[[<[([]))<([[{}[[()]]]
+	[{[{({}]{}}([{[{{{}}([]
+	{<[[]]>}<{[{[{[]{()[[[]
+	[<(<(<(<{}))><([]([]()
+	<{([([[(<>()){}]>(<<{{
+	<{([{{}}[<[[[<>{}]]]>[]]
 
 Some of the lines aren't corrupted, just incomplete; you can ignore these lines
 for now. The remaining five lines are corrupted:

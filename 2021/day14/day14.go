@@ -23,24 +23,24 @@ would result after repeating the pair insertion process a few times.
 
 For example:
 
-    NNCB
+	NNCB
 
-    CH -> B
-    HH -> N
-    CB -> H
-    NH -> C
-    HB -> C
-    HC -> B
-    HN -> C
-    NN -> C
-    BH -> H
-    NC -> B
-    NB -> B
-    BN -> B
-    BB -> N
-    BC -> B
-    CC -> N
-    CN -> C
+	CH -> B
+	HH -> N
+	CB -> H
+	NH -> C
+	HB -> C
+	HC -> B
+	HN -> C
+	NN -> C
+	BH -> H
+	NC -> B
+	NB -> B
+	BN -> B
+	BB -> N
+	BC -> B
+	CC -> N
+	CN -> C
 
 The first line is the polymer template - this is the starting point of the
 process.
@@ -68,11 +68,11 @@ After the first step of this process, the polymer becomes NCNBCHB.
 
 Here are the results of a few steps using the above rules:
 
-    Template:     NNCB
-    After step 1: NCNBCHB
-    After step 2: NBCCNBBBCBHCB
-    After step 3: NBBBCNCCNBBNBNBBCHBHHBCHB
-    After step 4: NBBNBNBBCCNBCNCCNBBNBBNBBBNBBNBBCBHCBHHNHCBBCBHCB
+	Template:     NNCB
+	After step 1: NCNBCHB
+	After step 2: NBCCNBBBCBHCB
+	After step 3: NBBBCNCCNBBNBNBBCHBHHBCHB
+	After step 4: NBBNBNBBCCNBCNCCNBBNBBNBBBNBBNBBCBHCBHHNHCBBCBHCB
 
 This polymer grows quickly. After step 5, it has length 97; After step 10, it
 has length 3073. After step 10, B occurs 1749 times, C occurs 298 times, H

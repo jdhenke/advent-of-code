@@ -24,23 +24,23 @@ without them, so you'd better figure out what's wrong.
 Each digit of a seven-segment display is rendered by turning on or off any of
 seven segments named a through g:
 
-      0:      1:      2:      3:      4:
-     aaaa    ....    aaaa    aaaa    ....
-    b    c  .    c  .    c  .    c  b    c
-    b    c  .    c  .    c  .    c  b    c
-     ....    ....    dddd    dddd    dddd
-    e    f  .    f  e    .  .    f  .    f
-    e    f  .    f  e    .  .    f  .    f
-     gggg    ....    gggg    gggg    ....
+	  0:      1:      2:      3:      4:
+	 aaaa    ....    aaaa    aaaa    ....
+	b    c  .    c  .    c  .    c  b    c
+	b    c  .    c  .    c  .    c  b    c
+	 ....    ....    dddd    dddd    dddd
+	e    f  .    f  e    .  .    f  .    f
+	e    f  .    f  e    .  .    f  .    f
+	 gggg    ....    gggg    gggg    ....
 
-      5:      6:      7:      8:      9:
-     aaaa    aaaa    aaaa    aaaa    aaaa
-    b    .  b    .  .    c  b    c  b    c
-    b    .  b    .  .    c  b    c  b    c
-     dddd    dddd    ....    dddd    dddd
-    .    f  e    f  .    f  e    f  .    f
-    .    f  e    f  .    f  e    f  .    f
-     gggg    gggg    ....    gggg    gggg
+	  5:      6:      7:      8:      9:
+	 aaaa    aaaa    aaaa    aaaa    aaaa
+	b    .  b    .  .    c  b    c  b    c
+	b    .  b    .  .    c  b    c  b    c
+	 dddd    dddd    ....    dddd    dddd
+	.    f  e    f  .    f  e    f  .    f
+	.    f  e    f  .    f  e    f  .    f
+	 gggg    gggg    ....    gggg    gggg
 
 So, to render a 1, only segments c and f would be turned on; the rest would be
 off. To render a 7, only segments a, c, and f would be turned on.
@@ -65,8 +65,8 @@ to work out which pattern corresponds to which digit.
 
 For example, here is what you might see in a single entry in your notes:
 
-    acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab |
-    cdfeb fcadb cdfeb cdbaf
+	acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab |
+	cdfeb fcadb cdfeb cdbaf
 
 (The entry is wrapped here to two lines so it fits; in your notes, it will all
 be on a single line.)
@@ -89,26 +89,26 @@ difficult to deduce.
 
 For now, focus on the easy digits. Consider this larger example:
 
-    be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb |
-    fdgacbe cefdb cefbgd gcbe
-    edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec |
-    fcgedb cgb dgebacf gc
-    fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef |
-    cg cg fdcagb cbg
-    fbegcd cbd adcefb dageb afcb bc aefdc ecdab fgdeca fcdbega |
-    efabcd cedba gadfec cb
-    aecbfdg fbg gf bafeg dbefa fcge gcbea fcaegb dgceab fcbdga |
-    gecf egdcabf bgf bfgea
-    fgeab ca afcebg bdacfeg cfaedg gcfdb baec bfadeg bafgc acf |
-    gebdcfa ecba ca fadegcb
-    dbcfg fgd bdegcaf fgec aegbdf ecdfab fbedc dacgb gdcebf gf |
-    cefg dcbef fcge gbcadfe
-    bdfegc cbegaf gecbf dfcage bdacg ed bedf ced adcbefg gebcd |
-    ed bcgafe cdgba cbgef
-    egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg |
-    gbdfcae bgc cg cgb
-    gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc |
-    fgae cfgab fg bagce
+	be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb |
+	fdgacbe cefdb cefbgd gcbe
+	edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec |
+	fcgedb cgb dgebacf gc
+	fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef |
+	cg cg fdcagb cbg
+	fbegcd cbd adcefb dageb afcb bc aefdc ecdab fgdeca fcdbega |
+	efabcd cedba gadfec cb
+	aecbfdg fbg gf bafeg dbefa fcge gcbea fcaegb dgceab fcbdga |
+	gecf egdcabf bgf bfgea
+	fgeab ca afcebg bdacfeg cfaedg gcfdb baec bfadeg bafgc acf |
+	gebdcfa ecba ca fadegcb
+	dbcfg fgd bdegcaf fgec aegbdf ecdfab fbedc dacgb gdcebf gf |
+	cefg dcbef fcge gbcadfe
+	bdfegc cbegaf gecbf dfcage bdacg ed bedf ced adcbefg gebcd |
+	ed bcgafe cdgba cbgef
+	egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg |
+	gbdfcae bgc cg cgb
+	gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc |
+	fgae cfgab fg bagce
 
 Because the digits 1, 4, 7, and 8 each use a unique number of segments, you
 should be able to tell which combinations of signals correspond to those
@@ -142,19 +142,19 @@ Part2 Prompt
 Through a little deduction, you should now be able to determine the remaining
 digits. Consider again the first example above:
 
-    acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab |
-    cdfeb fcadb cdfeb cdbaf
+	acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab |
+	cdfeb fcadb cdfeb cdbaf
 
 After some careful analysis, the mapping between signal wires and segments only
 make sense in the following configuration:
 
-     dddd
-    e    a
-    e    a
-     ffff
-    g    b
-    g    b
-     cccc
+	 dddd
+	e    a
+	e    a
+	 ffff
+	g    b
+	g    b
+	 cccc
 
 So, the unique signal patterns would correspond to the following digits:
 

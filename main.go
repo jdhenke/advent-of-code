@@ -61,6 +61,7 @@ import (
 	aoc2021day7 "github.com/jdhenke/advent-of-code/2021/day7"
 	aoc2021day8 "github.com/jdhenke/advent-of-code/2021/day8"
 	aoc2021day9 "github.com/jdhenke/advent-of-code/2021/day9"
+	aoc2022day17 "github.com/jdhenke/advent-of-code/2022/day17"
 	"github.com/jdhenke/advent-of-code/solution"
 )
 
@@ -220,6 +221,8 @@ func getSolution(year, day, part int) (solution.Func, bool) {
 		{2021, 24, 2}: aoc2021day24.Part2,
 		{2021, 25, 1}: aoc2021day25.Part1,
 		{2021, 25, 2}: aoc2021day25.Part2,
+		{2022, 17, 1}: aoc2022day17.Part1,
+		{2022, 17, 2}: aoc2022day17.Part2,
 	}
 	sol, ok := solutions[key{year, day, part}]
 	return sol, ok

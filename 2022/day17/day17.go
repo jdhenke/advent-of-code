@@ -375,7 +375,7 @@ How many units tall will the tower of rocks be after 2022 rocks have stopped
 falling?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day17(r)
+	return day17(r, 2022)
 }
 
 /*
@@ -391,12 +391,23 @@ In the example above, the tower would be 1514285714288 units tall!
 How tall will the tower be after 1000000000000 rocks have stopped?
 */
 func Part2(r io.Reader) (answer int, err error) {
-	return day17(r)
+	return day17(r, 1000000000000)
 }
 
-const numRocks = 2022
+type inputs struct {
+	blockIndex int
+	moveIndex  int
+	skyline    [7]int
+}
 
-func day17(r io.Reader) (answer int, err error) {
+type state struct {
+	rockNumber int
+	height     int
+}
+
+func day17(r io.Reader, numRocks int) (answer int, err error) {
+	var memo = make(map[inputs]state)
+
 	b, err := io.ReadAll(r)
 	if err != nil {
 		return 0, err
@@ -406,14 +417,44 @@ func day17(r io.Reader) (answer int, err error) {
 	g := newGrid()
 	maxHeight := 0
 	j := 0
+	projected := 0
 
 	for i := 0; i < numRocks; i++ {
-		b := blocks[i%len(blocks)]
+		blockIndex := i % len(blocks)
+		b := blocks[blockIndex]
 		b.SetLoc(2, maxHeight+3+1) // want a gap of 3
+
 		for {
+			moveIndex := j % len(moves)
+
+			// check if we've seen this block / move / scenario before, and if so, how long ago and how much has the
+			// height changed? extrapolate that forward to the last iteration shy of a numRocks and set aside the
+			// assumed height to add back at the very end so this can just continue to run like normal.
+			in := inputs{
+				blockIndex: blockIndex,
+				moveIndex:  moveIndex,
+				skyline:    g.GetSkyline(maxHeight),
+			}
+			newState := state{
+				rockNumber: i,
+				height:     maxHeight,
+			}
+			if oldState, ok := memo[in]; ok {
+				dr := newState.rockNumber - oldState.rockNumber
+				dh := newState.height - oldState.height
+				cycles := (numRocks - i) / dr
+				projected += cycles * dh
+				i += cycles * dr
+				// Technically not necessary, but this avoids every block after this from matching on its previous
+				// state and needlessly redoing this computation because they will all be within the final cycle and so
+				// cycles will be 0 and therefore add nothing to projected or i.
+				clear(memo)
+			}
+			memo[in] = newState
+
 			debug(g, b)
 			var dx int
-			if moves[j%len(moves)] == '>' {
+			if moves[moveIndex] == '>' {
 				dx = 1
 			} else {
 				dx = -1
@@ -432,7 +473,7 @@ func day17(r io.Reader) (answer int, err error) {
 			b.Move(0, -1)
 		}
 	}
-	return maxHeight, nil
+	return projected + maxHeight, nil
 }
 
 func debug(g *grid, b *block) {
@@ -580,4 +621,15 @@ func (g *grid) Print(b *block) {
 		fmt.Println()
 	}
 	fmt.Println("-------")
+}
+
+func (g *grid) GetSkyline(maxY int) [7]int {
+	var out [7]int
+	for x := 0; x < 7; x++ {
+		y := maxY
+		for ; y > 0 && !g.Has(x, y); y-- {
+		}
+		out[x] = maxY - y
+	}
+	return out
 }

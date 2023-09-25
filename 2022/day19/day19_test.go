@@ -12,13 +12,13 @@ Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsid
 func TestPart1(t *testing.T) {
 	tester.New(t, day19.Part1).Run(
 		tester.FromString(testData).Want(33),
-		//tester.FromFile("input.txt").Want(0),
+		//tester.FromFile("input.txt").Want(1177),
 	)
 }
 
-// func TestPart2(t *testing.T) {
-// 	tester.New(t, day19.Part2).Run(
-// 		tester.FromString(testData).Want(0),
-// 		tester.FromFile("input.txt").Want(0),
-// 	)
-// }
+func TestPart2(t *testing.T) {
+	tester.New(t, day19.Part2).Run(
+		tester.FromString(testData).Want(56 * 62),
+		//tester.FromFile("input.txt").Want(62744),
+	)
+}

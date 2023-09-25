@@ -205,33 +205,53 @@ geodes it could produce in 24 minutes. What do you get if you add up the
 quality level of all of the blueprints in your list?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day19(r)
+	geodes, err := day19(r, -1, 24)
+	if err != nil {
+		return 0, err
+	}
+	for i, g := range geodes {
+		answer += (i + 1) * g
+	}
+	return answer, nil
 }
 
 func Part2(r io.Reader) (answer int, err error) {
-	return day19(r)
+	geodes, err := day19(r, 3, 32)
+	if err != nil {
+		return 0, err
+	}
+	answer = 1
+	for _, g := range geodes {
+		answer *= g
+	}
+	return answer, nil
 }
 
 const tmpl = `Blueprint %d: Each ore robot costs %d ore. Each clay robot costs %d ore. Each obsidian robot costs %d ore and %d clay. Each geode robot costs %d ore and %d obsidian.`
 
-func day19(r io.Reader) (answer int, err error) {
+func day19(r io.Reader, numBlueprints int, steps int) (answers []int, err error) {
+	i := 0
 	if err := input.ForEachLine(r, func(line string) error {
+		if numBlueprints > 0 && i >= numBlueprints {
+			return nil
+		}
+		i++
 		b := blueprint{}
 		if _, err := fmt.Sscanf(line, tmpl, &b.id, &b.oreRobotCost.ore, &b.clayRobotCost.ore, &b.obsidianRobotCost.ore, &b.obsidianRobotCost.clay, &b.geodeRobotCost.ore, &b.geodeRobotCost.obsidian); err != nil {
 			return err
 		}
 		memo := make(map[state]*int)
-		m := maxGeodes(memo, b, state{oreRobots: 1, steps: 24}, 0)
+		m := maxGeodes(memo, b, state{oreRobots: 1, steps: steps}, -1)
 		if m == nil {
 			m = ptr(0)
 		}
 		fmt.Printf("ID %d max %d memo %d\n", b.id, *m, len(memo))
-		answer += b.id * *m
+		answers = append(answers, *m)
 		return nil
 	}); err != nil {
-		return 0, err
+		return nil, err
 	}
-	return answer, nil
+	return answers, nil
 }
 
 func ptr(i int) *int {
@@ -239,6 +259,7 @@ func ptr(i int) *int {
 }
 
 func maxGeodes(memo map[state]*int, b blueprint, s state, alt int) (ans *int) {
+	//fmt.Println(s)
 	// base case
 	if s.steps == 0 {
 		return ptr(0)
@@ -258,12 +279,14 @@ func maxGeodes(memo map[state]*int, b blueprint, s state, alt int) (ans *int) {
 	}
 
 	// otherwise choose the best option
-	nextStates := getNextStates(b, s)
+	nextStates := getNextStates(b, s) // note: these may have take different numbers of steps
 	found := false
 	for _, next := range nextStates {
-		if nextMax := maxGeodes(memo, b, next, alt-s.geodeRobots); nextMax != nil && *nextMax+s.geodeRobots > alt {
+		nextSteps := s.steps - next.steps
+		earned := nextSteps * s.geodeRobots
+		if nextMax := maxGeodes(memo, b, next, alt-earned); nextMax != nil && *nextMax+earned > alt {
 			found = true
-			alt = *nextMax + s.geodeRobots
+			alt = *nextMax + earned
 		}
 	}
 	if !found {
@@ -272,33 +295,72 @@ func maxGeodes(memo map[state]*int, b blueprint, s state, alt int) (ans *int) {
 	return &alt
 }
 
-func getNextStates(b blueprint, s state) []state {
+func getNextStates(b blueprint, prev state) []state {
 	var out []state
-	if s.afford(b.geodeRobotCost) {
-		sub := s.sub(b.geodeRobotCost)
-		sub = sub.tick()
-		sub.geodeRobots++
-		out = append(out, sub)
+
+	// what's next robot to make?
+	for _, c := range []struct {
+		check func(s state) bool
+		cost  cost
+		buy   func(p *state)
+	}{
+		{
+			check: func(s state) bool {
+				return s.obsidianRobots > 0
+			},
+			cost: b.geodeRobotCost,
+			buy: func(p *state) {
+				p.geodeRobots++
+			},
+		},
+		{
+			check: func(s state) bool {
+				return s.clayRobots > 0
+			},
+			cost: b.obsidianRobotCost,
+			buy: func(p *state) {
+				p.obsidianRobots++
+			},
+		},
+		{
+			check: func(s state) bool {
+				return true
+			},
+			cost: b.clayRobotCost,
+			buy: func(p *state) {
+				p.clayRobots++
+			},
+		},
+		{
+			check: func(s state) bool {
+				return true
+			},
+			cost: b.oreRobotCost,
+			buy: func(p *state) {
+				p.oreRobots++
+			},
+		},
+	} {
+		s := prev
+		if !c.check(s) {
+			continue
+		}
+		for !s.afford(c.cost) {
+			s = s.tick()
+		}
+		s = s.sub(c.cost)
+		s = s.tick()
+		c.buy(&s)
+		if s.steps >= 0 {
+			out = append(out, s)
+		}
 	}
-	if s.afford(b.obsidianRobotCost) {
-		sub := s.sub(b.obsidianRobotCost)
-		sub = sub.tick()
-		sub.obsidianRobots++
-		out = append(out, sub)
-	}
-	if s.afford(b.clayRobotCost) {
-		sub := s.sub(b.clayRobotCost)
-		sub = sub.tick()
-		sub.clayRobots++
-		out = append(out, sub)
-	}
-	if s.afford(b.oreRobotCost) {
-		sub := s.sub(b.oreRobotCost)
-		sub = sub.tick()
-		sub.oreRobots++
-		out = append(out, sub)
-	}
-	out = append(out, s.tick())
+
+	hold := prev
+	hold.steps = 0
+	out = append(out, hold)
+	//fmt.Print(prev, out)
+	//fmt.Scanln()
 	return out
 }
 

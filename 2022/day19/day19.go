@@ -466,7 +466,6 @@ func day19(r io.Reader, numBlueprints int, numSteps int) (answers []int, err err
 			return err
 		}
 		m := maxGeodes(make(map[state]*int), b, state{oreRobots: 1, steps: numSteps}, -1)
-		fmt.Println(b.id, *m)
 		answers = append(answers, *m)
 		return nil
 	})); err != nil {

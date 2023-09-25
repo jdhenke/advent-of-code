@@ -1,9 +1,9 @@
 package main
 
 import (
-	aoc2022day19 "github.com/jdhenke/advent-of-code/2022/day19"
 	"flag"
 	"fmt"
+	aoc2022day19 "github.com/jdhenke/advent-of-code/2022/day19"
 	"log"
 	"os"
 	"path/filepath"
@@ -230,5 +230,3 @@ func getSolution(year, day, part int) (solution.Func, bool) {
 	sol, ok := solutions[key{year, day, part}]
 	return sol, ok
 }
-
-

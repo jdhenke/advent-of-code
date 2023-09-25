@@ -448,28 +448,28 @@ func Part2(r io.Reader) (answer int, err error) {
 	return answer, nil
 }
 
-const tmpl = `Blueprint %d: Each ore robot costs %d ore. Each clay robot costs %d ore. Each obsidian robot costs %d ore and %d clay. Each geode robot costs %d ore and %d obsidian.`
-
-func day19(r io.Reader, numBlueprints int, steps int) (answers []int, err error) {
-	i := 0
-	if err := input.ForEachLine(r, func(line string) error {
-		if numBlueprints > 0 && i >= numBlueprints {
-			return nil
-		}
-		i++
-		b := blueprint{}
-		if _, err := fmt.Sscanf(line, tmpl, &b.id, &b.oreRobotCost.ore, &b.clayRobotCost.ore, &b.obsidianRobotCost.ore, &b.obsidianRobotCost.clay, &b.geodeRobotCost.ore, &b.geodeRobotCost.obsidian); err != nil {
+func day19(r io.Reader, numBlueprints int, numSteps int) (answers []int, err error) {
+	const blueprintTmpl = `Blueprint %d: Each ore robot costs %d ore. Each clay robot costs %d ore. Each obsidian robot costs %d ore and %d clay. Each geode robot costs %d ore and %d obsidian.`
+	if err := input.ForEachLine(r, input.FirstN(numBlueprints, func(line string) error {
+		var b blueprint
+		if _, err := fmt.Sscanf(
+			line,
+			blueprintTmpl,
+			&b.id,
+			&b.oreRobotCost.ore,
+			&b.clayRobotCost.ore,
+			&b.obsidianRobotCost.ore,
+			&b.obsidianRobotCost.clay,
+			&b.geodeRobotCost.ore,
+			&b.geodeRobotCost.obsidian,
+		); err != nil {
 			return err
 		}
-		memo := make(map[state]*int)
-		m := maxGeodes(memo, b, state{oreRobots: 1, steps: steps}, -1)
-		if m == nil {
-			m = ptr(0)
-		}
-		fmt.Printf("ID %d max %d memo %d\n", b.id, *m, len(memo))
+		m := maxGeodes(make(map[state]*int), b, state{oreRobots: 1, steps: numSteps}, -1)
+		fmt.Println(b.id, *m)
 		answers = append(answers, *m)
 		return nil
-	}); err != nil {
+	})); err != nil {
 		return nil, err
 	}
 	return answers, nil
@@ -479,8 +479,8 @@ func ptr(i int) *int {
 	return &i
 }
 
+// alt is the best alternative the caller has to this path. if maxGeodes cannot find a better path, it returns nil.
 func maxGeodes(memo map[state]*int, b blueprint, s state, alt int) (ans *int) {
-	//fmt.Println(s)
 	// base case
 	if s.steps == 0 {
 		return ptr(0)
@@ -494,34 +494,28 @@ func maxGeodes(memo map[state]*int, b blueprint, s state, alt int) (ans *int) {
 		memo[s] = ans
 	}(s)
 
-	// if the alternative is impossible to beat, bail now
+	// if the alternative is impossible to beat even in the best case, bail now
 	if ceiling(s) < alt {
 		return nil
 	}
 
 	// otherwise choose the best option
-	nextStates := getNextStates(b, s) // note: these may have take different numbers of steps
-	found := false
-	for _, next := range nextStates {
-		nextSteps := s.steps - next.steps
-		earned := nextSteps * s.geodeRobots
+	for _, next := range getNextStates(b, s) {
+		earned := (s.steps - next.steps) * s.geodeRobots // next states may be different numbers of steps ahead
 		if nextMax := maxGeodes(memo, b, next, alt-earned); nextMax != nil && *nextMax+earned > alt {
-			found = true
-			alt = *nextMax + earned
+			alt = earned + *nextMax
+			ans = &alt
 		}
 	}
-	if !found {
-		return nil
-	}
-	return &alt
+
+	// note: ans will (correctly) be nil if no better solution is found
+	return ans
 }
 
 func getNextStates(b blueprint, prev state) []state {
 	var out []state
-
-	// what's next robot to make?
 	for _, c := range []struct {
-		check func(s state) bool
+		check func(s state) bool // do requisite robots exist to potentially ever afford the kind of cost?
 		cost  cost
 		buy   func(p *state)
 	}{
@@ -572,24 +566,26 @@ func getNextStates(b blueprint, prev state) []state {
 		s = s.sub(c.cost)
 		s = s.tick()
 		c.buy(&s)
-		if s.steps >= 0 {
-			out = append(out, s)
+		if s.steps < 0 {
+			continue
 		}
+		out = append(out, s)
 	}
 
 	hold := prev
 	hold.steps = 0
 	out = append(out, hold)
-	//fmt.Print(prev, out)
-	//fmt.Scanln()
 	return out
 }
 
 func ceiling(s state) int {
-	// guaranteed have, will have, and what will be added if every step from here on out gets a robot
+	// first term is guaranteed geodes given geodeRobots that already exist
+	// second term is maxPossible that could be earned given adding a geodeRobot every turn as well
 	return s.steps*s.geodeRobots + (s.steps*s.steps+s.steps)/2
 }
 
+// Intentionally does not include geodes earned in preceding steps to allow for different paths arriving at the same
+// end game to be captured in the same memoized entry.
 type state struct {
 	steps                                              int
 	ore, clay, obsidian                                int

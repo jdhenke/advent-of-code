@@ -21,6 +21,20 @@ func ForEachLine(r io.Reader, f func(line string) error) error {
 	return nil
 }
 
+func FirstN(n int, f func(line string) error) func(string) error {
+	i := 0
+	if n < 0 {
+		return f
+	}
+	return func(s string) error {
+		if i >= n {
+			return nil
+		}
+		i++
+		return f(s)
+	}
+}
+
 func ForEachInt(r io.Reader, f func(x int)) error {
 	return ForEachLine(r, func(line string) error {
 		n, err := strconv.Atoi(line)

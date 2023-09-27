@@ -1,11 +1,9 @@
 package day20
 
 import (
-	"fmt"
 	"github.com/jdhenke/advent-of-code/input"
 	"io"
 	"slices"
-	"strings"
 )
 
 /*
@@ -87,56 +85,104 @@ Mix your encrypted file exactly once. What is the sum of the three numbers that
 form the grove coordinates?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day20(r)
+	return day20(r, 1, 1)
 }
 
+/*
+Part2 Prompt
+
+--- Part Two ---
+The grove coordinate values seem nonsensical. While you ponder the mysteries of
+Elf encryption, you suddenly remember the rest of the decryption routine you
+overheard back at camp.
+
+First, you need to apply the decryption key, 811589153. Multiply each number by
+the decryption key before you begin; this will produce the actual list of
+numbers to mix.
+
+Second, you need to mix the list of numbers ten times. The order in which the
+numbers are mixed does not change during mixing; the numbers are still moved in
+the order they appeared in the original, pre-mixed list. (So, if -3 appears
+fourth in the original list of numbers to mix, -3 will be the fourth number to
+move during each round of mixing.)
+
+Using the same example as above:
+
+	Initial arrangement:
+	811589153, 1623178306, -2434767459, 2434767459, -1623178306, 0, 3246356612
+
+	After 1 round of mixing:
+	0, -2434767459, 3246356612, -1623178306, 2434767459, 1623178306, 811589153
+
+	After 2 rounds of mixing:
+	0, 2434767459, 1623178306, 3246356612, -2434767459, -1623178306, 811589153
+
+	After 3 rounds of mixing:
+	0, 811589153, 2434767459, 3246356612, 1623178306, -1623178306, -2434767459
+
+	After 4 rounds of mixing:
+	0, 1623178306, -2434767459, 811589153, 2434767459, 3246356612, -1623178306
+
+	After 5 rounds of mixing:
+	0, 811589153, -1623178306, 1623178306, -2434767459, 3246356612, 2434767459
+
+	After 6 rounds of mixing:
+	0, 811589153, -1623178306, 3246356612, -2434767459, 1623178306, 2434767459
+
+	After 7 rounds of mixing:
+	0, -2434767459, 2434767459, 1623178306, -1623178306, 811589153, 3246356612
+
+	After 8 rounds of mixing:
+	0, 1623178306, 3246356612, 811589153, -2434767459, 2434767459, -1623178306
+
+	After 9 rounds of mixing:
+	0, 811589153, 1623178306, -2434767459, 3246356612, 2434767459, -1623178306
+
+	After 10 rounds of mixing:
+	0, -2434767459, 1623178306, 3246356612, -1623178306, 2434767459, 811589153
+
+The grove coordinates can still be found in the same way. Here, the 1000th
+number after 0 is 811589153, the 2000th is 2434767459, and the 3000th is
+-1623178306; adding these together produces 1623178306.
+
+Apply the decryption key and mix your encrypted file ten times. What is the sum
+of the three numbers that form the grove coordinates?
+*/
 func Part2(r io.Reader) (answer int, err error) {
-	return day20(r)
+	return day20(r, 811589153, 10)
 }
 
-type num struct {
-	v int
-}
-
-func day20(r io.Reader) (answer int, err error) {
-	var orig []*num
-	var nums []*num
+func day20(r io.Reader, multiple int, times int) (answer int, err error) {
+	var orig []*int
+	var nums []*int
+	var zero *int
 	if err := input.ForEachInt(r, func(x int) {
-		n := &num{x}
+		x *= multiple
+		n := &x
+		if x == 0 {
+			zero = n
+		}
 		orig = append(orig, n)
 		nums = append(nums, n)
 	}); err != nil {
 		return 0, err
 	}
-	for _, n := range orig {
-		i := slices.Index(nums, n)
-		j := mod(i+n.v, len(nums)-1)
-		//fmt.Println(n.v, i, j, printNums(nums))
-		//if j > i {
-		//	j--
-		//}
-		nums = slices.Delete(nums, i, i+1)
-		nums = slices.Insert(nums, j, n)
+	for t := 0; t < times; t++ {
+		for _, n := range orig {
+			i := slices.Index(nums, n)
+			j := mod(i+*n, len(nums)-1)
+			nums = slices.Delete(nums, i, i+1)
+			nums = slices.Insert(nums, j, n)
+		}
 	}
-	//fmt.Println(printNums(nums))
-	i := 0
-	for nums[i].v != 0 {
-		i++
-	}
+	i := slices.Index(nums, zero)
 	for _, d := range []int{1000, 2000, 3000} {
-		answer += nums[(i+d)%len(nums)].v
+		answer += *nums[(i+d)%len(nums)]
 	}
 	return answer, nil
 }
 
-func printNums(nums []*num) string {
-	var out []string
-	for _, n := range nums {
-		out = append(out, fmt.Sprint(n))
-	}
-	return strings.Join(out, ",")
-}
-
+// % is technically a "remainder" and may be negative; this ensures its positive
 func mod(a, b int) int {
 	return (a%b + b) % b
 }

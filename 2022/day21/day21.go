@@ -116,7 +116,10 @@ type expr struct {
 	v    int
 }
 
-const opVal = "val"
+const (
+	opVal  = "v"
+	opHumn = "h"
+)
 
 func parse(r io.Reader) (map[string]*expr, error) {
 	m := make(map[string]*expr)
@@ -169,16 +172,16 @@ func part1(m map[string]*expr, k string) int {
 
 func part2(m map[string]*expr) int {
 	root, humn := m["root"], m["humn"]
-	root.op, humn.op, humn.v = "=", "humn", 0
+	root.op, humn.op, humn.v = "=", opHumn, 0
 
 	// collapse all equations involving constants that we can
 	for {
 		changed := false
 		for _, e := range m {
-			if strings.Contains("+-*/", e.op) && m[e.l].op == "val" && m[e.r].op == "val" {
+			if strings.Contains("+-*/", e.op) && m[e.l].op == opVal && m[e.r].op == opVal {
 				changed = true
 				e.v = ops[e.op](m[e.l].v, m[e.r].v)
-				e.op = "val"
+				e.op = opVal
 			}
 		}
 		if !changed {
@@ -198,7 +201,7 @@ func part2(m map[string]*expr) int {
 // side will always be solved until we get to the humn expression.
 func force(m map[string]*expr, e *expr, val int) {
 	switch e.op {
-	case "humn":
+	case opHumn:
 		e.v = val
 	case "+": // l + r = val
 		force(m, m[e.l], val-m[e.r].v)
@@ -207,16 +210,16 @@ func force(m map[string]*expr, e *expr, val int) {
 		force(m, m[e.l], val+m[e.r].v)
 		force(m, m[e.r], m[e.l].v-val)
 	case "*": // l * r = val
-		if m[e.r].op == "val" {
+		if m[e.r].op == opVal {
 			force(m, m[e.l], val/m[e.r].v)
 		}
-		if m[e.l].op == "val" {
+		if m[e.l].op == opVal {
 			force(m, m[e.r], val/m[e.l].v)
 		}
 	case "/": // l / r = val
 		force(m, m[e.l], val*m[e.r].v)
 		force(m, m[e.r], m[e.l].v/val)
-	case "val":
+	case opVal:
 	default:
 		panic("? op: " + e.op)
 	}

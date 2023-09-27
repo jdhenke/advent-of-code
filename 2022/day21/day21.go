@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jdhenke/advent-of-code/input"
 	"io"
+	"strings"
 )
 
 /*
@@ -70,11 +71,42 @@ However, your actual situation involves considerably more monkeys. What number
 will the monkey named root yell?
 */
 func Part1(r io.Reader) (answer int, err error) {
-	return day21(r)
+	m, err := parse(r)
+	if err != nil {
+		return 0, err
+	}
+	return part1(m, "root"), nil
 }
 
+/*
+Part2 Prompt
+
+--- Part Two ---
+Due to some kind of monkey-elephant-human mistranslation, you seem to have
+misunderstood a few key details about the riddle.
+
+First, you got the wrong job for the monkey named root; specifically, you got
+the wrong math operation. The correct operation for monkey root should be =,
+which means that it still listens for two numbers (from the same two monkeys as
+before), but now checks that the two numbers match.
+
+Second, you got the wrong monkey for the job starting with humn:. It isn't a
+monkey - it's you. Actually, you got the job wrong, too: you need to figure out
+what number you need to yell so that root's equality check passes. (The number
+that appears after humn: in your input is now irrelevant.)
+
+In the above example, the number you need to yell to pass root's equality test
+is 301. (This causes root to get the same number, 150, from both of its
+monkeys.)
+
+What number do you yell to pass root's equality test?
+*/
 func Part2(r io.Reader) (answer int, err error) {
-	return day21(r)
+	m, err := parse(r)
+	if err != nil {
+		return 0, err
+	}
+	return part2(m), nil
 }
 
 type expr struct {
@@ -86,7 +118,7 @@ type expr struct {
 
 const opVal = "val"
 
-func day21(r io.Reader) (answer int, err error) {
+func parse(r io.Reader) (map[string]*expr, error) {
 	m := make(map[string]*expr)
 	if err := input.ForEachLine(r, func(line string) error {
 		var (
@@ -106,29 +138,86 @@ func day21(r io.Reader) (answer int, err error) {
 		m[key] = &expr{k: key, op: op, l: l, r: r}
 		return nil
 	}); err != nil {
-		return 0, err
+		return nil, err
 	}
-	return solve(m, "root"), nil
+	return m, nil
 }
 
-func solve(m map[string]*expr, k string) int {
+var ops = map[string]func(l, r int) int{
+	"+": func(l, r int) int {
+		return l + r
+	},
+	"-": func(l, r int) int {
+		return l - r
+	},
+	"*": func(l, r int) int {
+		return l * r
+	},
+	"/": func(l, r int) int {
+		return l / r
+	},
+}
+
+func part1(m map[string]*expr, k string) int {
 	e := m[k]
 	if e.op == opVal {
 		return e.v
 	}
-	l, r := solve(m, e.l), solve(m, e.r)
-	return map[string]func(l, r int) int{
-		"+": func(l, r int) int {
-			return l + r
-		},
-		"-": func(l, r int) int {
-			return l - r
-		},
-		"*": func(l, r int) int {
-			return l * r
-		},
-		"/": func(l, r int) int {
-			return l / r
-		},
-	}[e.op](l, r)
+	l, r := part1(m, e.l), part1(m, e.r)
+	return ops[e.op](l, r)
+}
+
+func part2(m map[string]*expr) int {
+	root, humn := m["root"], m["humn"]
+	root.op, humn.op, humn.v = "=", "humn", 0
+
+	// collapse all equations involving constants that we can
+	for {
+		changed := false
+		for _, e := range m {
+			if strings.Contains("+-*/", e.op) && m[e.l].op == "val" && m[e.r].op == "val" {
+				changed = true
+				e.v = ops[e.op](m[e.l].v, m[e.r].v)
+				e.op = "val"
+			}
+		}
+		if !changed {
+			break
+		}
+	}
+
+	// now force each side of root to equal each other
+	l, r := m[root.l], m[root.r]
+	force(m, l, r.v)
+	force(m, r, l.v)
+	return humn.v
+}
+
+// Note: being called when e is a val expression is a noop, so is safe to call on both sides to avoid always having to
+// check which side is a constant and which still needs solving. This is only OK because we can assume the exactly one
+// side will always be solved until we get to the humn expression.
+func force(m map[string]*expr, e *expr, val int) {
+	switch e.op {
+	case "humn":
+		e.v = val
+	case "+": // l + r = val
+		force(m, m[e.l], val-m[e.r].v)
+		force(m, m[e.r], val-m[e.l].v)
+	case "-": // l - r = val
+		force(m, m[e.l], val+m[e.r].v)
+		force(m, m[e.r], m[e.l].v-val)
+	case "*": // l * r = val
+		if m[e.r].op == "val" {
+			force(m, m[e.l], val/m[e.r].v)
+		}
+		if m[e.l].op == "val" {
+			force(m, m[e.r], val/m[e.l].v)
+		}
+	case "/": // l / r = val
+		force(m, m[e.l], val*m[e.r].v)
+		force(m, m[e.r], m[e.l].v/val)
+	case "val":
+	default:
+		panic("? op: " + e.op)
+	}
 }

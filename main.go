@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	aoc2022day19 "github.com/jdhenke/advent-of-code/2022/day19"
+	aoc2022day20 "github.com/jdhenke/advent-of-code/2022/day20"
 	"log"
 	"os"
 	"path/filepath"
@@ -226,6 +227,8 @@ func getSolution(year, day, part int) (solution.Func, bool) {
 		{2022, 17, 2}: aoc2022day17.Part2,
 		{2022, 19, 1}: aoc2022day19.Part1,
 		{2022, 19, 2}: aoc2022day19.Part2,
+		{2022, 20, 1}: aoc2022day20.Part1,
+		{2022, 20, 2}: aoc2022day20.Part2,
 	}
 	sol, ok := solutions[key{year, day, part}]
 	return sol, ok
